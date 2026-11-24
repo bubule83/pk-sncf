@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PK SNCF – prototype</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8102e">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5f7;--card:#fff;--tx:#14181f;--mut:#667085;--ac:#c8102e;--wbg:#0b0f16;--wtx:#fff;--bd:#d9dde3}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1318;--card:#181d25;--tx:#eef0f4;--mut:#98a2b3;--bd:#2a313c;--wbg:#000}}
+:root[data-theme="dark"]{--bg:#0f1318;--card:#181d25;--tx:#eef0f4;--mut:#98a2b3;--bd:#2a313c;--wbg:#000}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:800px){main{grid-template-columns:340px minmax(0,1fr)}}
+h1{font-size:18px;margin:0 0 2px}h2{font-size:14px;margin:0 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.watchwrap{display:flex;justify-content:center;padding:6px 0 12px}
+.watch{width:260px;height:260px;border-radius:50%;background:var(--wbg);color:var(--wtx);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:8px solid #2b3340;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.watch.sq{border-radius:34px}
+.w-line{font-size:14px;opacity:.75;letter-spacing:.03em}
+.w-pk{font-size:56px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.w-pk small{font-size:22px;font-weight:600;opacity:.8}
+.w-sub{font-size:13px;opacity:.7;margin-top:4px}
+.w-st{margin-top:8px;font-size:12px;padding:2px 10px;border-radius:20px;background:#1f7a3d}
+.w-st.off{background:#8a5a00}.w-st.none{background:#444}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 3px}
+input,button,select{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:7px 10px}
+input[type=range]{width:100%;padding:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
+button{cursor:pointer}button.p{background:var(--ac);border-color:var(--ac);color:#fff}
+#map{width:100%;height:280px;background:var(--bg);border:1px solid var(--bd);border-radius:10px}
+.note{font-size:12.5px;color:var(--mut)}
+code{background:var(--bg);padding:1px 5px;border-radius:5px}
+</style>
+</head>
+<body>
+<main>
+<section>
+  <div class="card">
+    <h1>PK SNCF · prototype</h1>
+    <div class="note" id="src">Données : démo fictive</div>
+    <div class="watchwrap"><div class="watch" id="watch">
+      <div class="w-line" id="wl">Ligne —</div>
+      <div class="w-pk" id="wp">—</div>
+      <div class="w-sub" id="ws"></div>
+      <div class="w-st none" id="wst">en attente</div>
+    </div></div>
+    <div class="row">
+      <button id="shape">Rond / carré</button>
+      <button id="fmt">Format : 12+400</button>
+    </div>
+  </div>
+</section>
+
+<section style="display:grid;gap:16px">
+  <div class="card">
+    <h2>Position</h2>
+    <div class="row">
+      <button class="p" id="gps">Utiliser le GPS du navigateur</button>
+      <button id="stop">Arrêter</button>
+    </div>
+    <label>Simulation : avancer le long de la ligne démo <span id="simv"></span></label>
+    <input type="range" id="sim" min="0" max="1000" value="300">
+    <label>Écart latéral simulé (m) <span id="offv"></span></label>
+    <input type="range" id="off" min="-500" max="500" value="0">
+    <div class="row">
+      <div><label>Latitude</label><input id="lat" inputmode="decimal"></div>
+      <div><label>Longitude</label><input id="lon" inputmode="decimal"></div>
+    </div>
+    <div class="note" id="gpsmsg" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Schéma</h2>
+    <svg id="map" viewBox="0 0 600 280" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Données réelles SNCF</h2>
+    <p class="note" style="margin-top:0">Charge un fichier CSV ou JSON/GeoJSON exporté depuis data.sncf.com ou data.gouv.fr (jeu avec <code>code_ligne</code>, <code>pk</code> et des coordonnées WGS84). Le fichier reste sur ton ordinateur, rien n’est envoyé.</p>
+    <input type="file" id="file" accept=".csv,.json,.geojson,.txt">
+    <div class="note" id="filemsg" style="margin-top:6px"></div>
+  </div>
+</section>
+</main>
+
+<script>
+(function(){
+  var pts=[], lines={}, decimal=false, watchId=null, cur=null;
+  var $=function(i){return document.getElementById(i)};
+
+  /* ---------- données démo (fictives, ~Montpellier → Sète) ---------- */
+  function demo(){
+    var a=[43.6050,3.8800], b=[43.4040,3.6960], out=[];
+    for(var i=0;i<=30;i++){
+      var t=i/30;
+      out.push({l:'000 000 (démo)',pk:i,lat:a[0]+(b[0]-a[0])*t+0.012*Math.sin(t*6),lon:a[1]+(b[1]-a[1])*t+0.010*Math.cos(t*5)-0.010});
+    }
+    return out;
+  }
+  function setData(arr,label){
+    pts=arr; lines={};
+    arr.forEach(function(p){(lines[p.l]=lines[p.l]||[]).push(p)});
+    Object.keys(lines).forEach(function(k){lines[k].sort(function(x,y){return x.pk-y.pk})});
+    $('src').textContent='Données : '+label+' ('+arr.length.toLocaleString('fr-FR')+' points, '+Object.keys(lines).length+' ligne(s))';
+    update();
+  }
+
+  /* ---------- calcul PK ---------- */
+  function locate(lat,lon){
+    var k=Math.cos(lat*Math.PI/180),best=null;
+    function xy(p){return [(p.lon-lon)*111.32*k,(p.lat-lat)*110.57]}
+    for(var l in lines){
+      var L=lines[l],prev=null,pp=null;
+      for(var i=0;i<L.length;i++){
+        var c=xy(L[i]);
+        var d=Math.hypot(c[0],c[1]);
+        if(!best||d<best.d){best={d:d,l:l,pk:L[i].pk,seg:null}}
+        if(pp&&L[i].pk-prev.pk<=5){
+          var dx=c[0]-pp[0],dy=c[1]-pp[1],len2=dx*dx+dy*dy;
+          if(len2>0){
+            var t=Math.max(0,Math.min(1,-(pp[0]*dx+pp[1]*dy)/len2));
+            var qx=pp[0]+t*dx,qy=pp[1]+t*dy,dd=Math.hypot(qx,qy);
+            if(dd<best.d){best={d:dd,l:l,pk:prev.pk+t*(L[i].pk-prev.pk),seg:[prev,L[i]]}}
+          }
+        }
+        prev=L[i];pp=c;
+      }
+    }
+    if(best)best.d*=1000;
+    return best;
+  }
+  function fmtPk(pk){
+    var km=Math.floor(pk),m=Math.round((pk-km)*1000);
+    if(m===1000){km++;m=0}
+    if(decimal)return km+','+String(m).padStart(3,'0');
+    return km+'+'+String(m).padStart(3,'0');
+  }
+
+  /* ---------- affichage ---------- */
+  function update(){
+    var lat=parseFloat($('lat').value.replace(',','.')),lon=parseFloat($('lon').value.replace(',','.'));
+    if(isNaN(lat)||isNaN(lon)||!pts.length){return}
+    var r=locate(lat,lon);cur=r;
+    var st=$('wst');
+    if(!r){return}
+    $('wl').textContent='Ligne '+r.l;
+    var s=fmtPk(r.pk);
+    var parts=s.split(/[+,]/);
+    $('wp').innerHTML=parts[0]+'<small>'+(decimal?',':'+')+parts[1]+'</small>';
+    $('ws').textContent='à '+Math.round(r.d)+' m de la voie';
+    if(r.d<150){st.className='w-st';st.textContent='sur la ligne'}
+    else if(r.d<1000){st.className='w-st off';st.textContent='proche de la ligne'}
+    else{st.className='w-st none';st.textContent='hors ligne (>1 km)'}
+    draw(lat,lon,r);
+  }
+  function draw(lat,lon,r){
+    var svg=$('map'),L=lines[r.l]||[],all=L.length?L:pts;
+    var k=Math.cos(lat*Math.PI/180);
+    var xs=all.map(function(p){return p.lon*k}).concat([lon*k]),ys=all.map(function(p){return p.lat}).concat([lat]);
+    var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs),y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
+    var w=(x1-x0)||1e-4,h=(y1-y0)||1e-4,sc=Math.min(560/w,240/h);
+    function X(lo){return 20+(lo*k-x0)*sc}function Y(la){return 260-(la-y0)*sc}
+    var path=L.map(function(p,i){return(i?'L':'M')+X(p.lon).toFixed(1)+' '+Y(p.lat).toFixed(1)}).join('');
+    var dots=L.filter(function(p){return p.pk%1===0&&L.length<400}).map(function(p){
+      return '<circle cx="'+X(p.lon).toFixed(1)+'" cy="'+Y(p.lat).toFixed(1)+'" r="2.5" fill="#98a2b3"/>'}).join('');
+    svg.innerHTML='<path d="'+path+'" fill="none" stroke="#98a2b3" stroke-width="3"/>'+dots+
+      '<circle cx="'+X(lon).toFixed(1)+'" cy="'+Y(lat).toFixed(1)+'" r="8" fill="#c8102e" stroke="#fff" stroke-width="2"/>';
+  }
+
+  /* ---------- position ---------- */
+  function setPos(lat,lon){$('lat').value=lat.toFixed(6);$('lon').value=lon.toFixed(6);update()}
+  function simulate(){
+    var t=$('sim').value/1000,off=$('off').value/1000;
+    $('simv').textContent='('+Math.round(t*100)+' %)';$('offv').textContent='('+$('off').value+' m)';
+    var D=demo(),n=D.length-1,f=t*n,i=Math.min(Math.floor(f),n-1),u=f-i;
+    var lat=D[i].lat+(D[i+1].lat-D[i].lat)*u,lon=D[i].lon+(D[i+1].lon-D[i].lon)*u;
+    lat+=off/110.57;
+    setPos(lat,lon);
+  }
+  $('sim').oninput=$('off').oninput=simulate;
+  $('lat').onchange=$('lon').onchange=update;
+  $('gps').onclick=function(){
+    if(!navigator.geolocation){$('gpsmsg').textContent='GPS indisponible dans ce navigateur.';return}
+    $('gpsmsg').textContent='Recherche de la position…';
+    watchId=navigator.geolocation.watchPosition(function(p){
+      $('gpsmsg').textContent='GPS actif · précision ±'+Math.round(p.coords.accuracy)+' m'+(p.coords.accuracy>200?' (Wi-Fi/IP : peu fiable sur Chromebook)':'');
+      setPos(p.coords.latitude,p.coords.longitude);
+    },function(e){$('gpsmsg').textContent='GPS refusé ou indisponible ('+e.message+'). Utilise la simulation.'},{enableHighAccuracy:true,maximumAge:2000});
+  };
+  $('stop').onclick=function(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}$('gpsmsg').textContent='GPS arrêté.'};
+  $('shape').onclick=function(){$('watch').classList.toggle('sq')};
+  $('fmt').onclick=function(){decimal=!decimal;$('fmt').textContent='Format : '+(decimal?'12,400':'12+400');update()};
+
+  /* ---------- import fichier ---------- */
+  function pkNum(v){
+    if(v==null||v==='')return NaN;
+    if(typeof v==='number')return v;
+    v=String(v).trim();
+    var m=v.match(/^(\d+)\s*\+\s*(\d+)$/);
+    if(m)return parseInt(m[1],10)+parseInt(m[2],10)/1000;
+    return parseFloat(v.replace(',','.'));
+  }
+  function pick(o,res){
+    for(var key in o){for(var i=0;i<res.length;i++){if(res[i].test(key.toLowerCase()))return o[key]}}
+  }
+  function toPoint(o){
+    var lat,lon,g=o.geo_point_2d||o.geopoint||o.coordonnees;
+    if(g){
+      if(typeof g==='object'&&!Array.isArray(g)){lat=g.lat;lon=g.lon}
+      else if(Array.isArray(g)){lat=g[0];lon=g[1]}
+      else{var s=String(g).split(',');lat=s[0];lon=s[1]}
+    }
+    if(lat==null){lat=pick(o,[/^lat/,/y_wgs84/,/latitude/]);lon=pick(o,[/^lon/,/^lng/,/x_wgs84/,/longitude/])}
+    var l=pick(o,[/code_?ligne/,/^ligne$/,/^lig/,/rg_troncon/]);
+    var pk=pkNum(pick(o,[/^pk$/,/^pk_/,/pk_?debut/,/point_?kilom/,/_pk$/]));
+    lat=parseFloat(lat);lon=parseFloat(lon);
+    if(isNaN(lat)||isNaN(lon)||isNaN(pk)||l==null||Math.abs(lat)>90||Math.abs(lon)>180)return null;
+    return {l:String(l),pk:pk,lat:lat,lon:lon};
+  }
+  function parseCSV(t){
+    var first=t.split(/\r?\n/)[0],sep=(first.split(';').length>first.split(',').length)?';':',';
+    var rows=t.split(/\r?\n/).filter(Boolean),h=rows[0].split(sep).map(function(x){return x.replace(/^"|"$/g,'').trim()}),out=[];
+    for(var i=1;i<rows.length;i++){
+      var c=rows[i].match(/("([^"]|"")*"|[^;,]*)(?=[;,]|$)/g)||[],o={};
+      if(sep===';')c=rows[i].split(';');
+      h.forEach(function(k,j){o[k]=(c[j]||'').replace(/^"|"$/g,'')});
+      out.push(o);
+    }
+    return out;
+  }
+  $('file').onchange=function(e){
+    var f=e.target.files[0];if(!f)return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      try{
+        var txt=rd.result,recs=[];
+        if(/^\s*[\[{]/.test(txt)){
+          var j=JSON.parse(txt);
+          if(j.features)recs=j.features.map(function(ft){var o=Object.assign({},ft.properties);
+            if(ft.geometry&&ft.geometry.type==='Point'){o.lon=ft.geometry.coordinates[0];o.lat=ft.geometry.coordinates[1]}return o});
+          else if(j.records)recs=j.records.map(function(r){return r.fields||r});
+          else recs=Array.isArray(j)?j:[];
+        }else recs=parseCSV(txt);
+        var arr=recs.map(toPoint).filter(Boolean);
+        if(!arr.length){$('filemsg').textContent='Aucun point exploitable : il faut une ligne, un PK et des coordonnées lat/lon (WGS84) par enregistrement.';return}
+        $('filemsg').textContent=arr.length+' points chargés depuis '+f.name+'.';
+        setData(arr,f.name);
+        var p=arr[0];setPos(p.lat,p.lon);
+      }catch(err){$('filemsg').textContent='Lecture impossible : '+err.message}
+    };
+    rd.readAsText(f);
+  };
+
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
+  setData(demo(),'démo fictive (ne pas utiliser pour de vrais PK)');
+  simulate();
+})();
+</script>
+</body>
+</html>
