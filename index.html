@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PK SNCF – prototype</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8102e">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5f7;--card:#fff;--tx:#14181f;--mut:#667085;--ac:#c8102e;--wbg:#0b0f16;--wtx:#fff;--bd:#d9dde3}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1318;--card:#181d25;--tx:#eef0f4;--mut:#98a2b3;--bd:#2a313c;--wbg:#000}}
+:root[data-theme="dark"]{--bg:#0f1318;--card:#181d25;--tx:#eef0f4;--mut:#98a2b3;--bd:#2a313c;--wbg:#000}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:800px){main{grid-template-columns:340px minmax(0,1fr)}}
+h1{font-size:18px;margin:0 0 2px}h2{font-size:14px;margin:0 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.watchwrap{display:flex;justify-content:center;padding:6px 0 12px}
+.watch{width:260px;height:260px;border-radius:50%;background:var(--wbg);color:var(--wtx);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:8px solid #2b3340;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.watch.sq{border-radius:34px}
+.w-line{font-size:14px;opacity:.75;letter-spacing:.03em}
+.w-pk{font-size:56px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.w-pk small{font-size:22px;font-weight:600;opacity:.8}
+.w-sub{font-size:13px;opacity:.7;margin-top:4px}
+.w-st{margin-top:8px;font-size:12px;padding:2px 10px;border-radius:20px;background:#1f7a3d}
+.w-st.off{background:#8a5a00}.w-st.none{background:#444}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 3px}
+input,button,select{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:7px 10px}
+input[type=range]{width:100%;padding:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
+button{cursor:pointer}button.p{background:var(--ac);border-color:var(--ac);color:#fff}
+#map{width:100%;height:280px;background:var(--bg);border:1px solid var(--bd);border-radius:10px}
+.note{font-size:12.5px;color:var(--mut)}
+code{background:var(--bg);padding:1px 5px;border-radius:5px}
+#lmap{width:100%;height:360px;border-radius:10px;border:1px solid var(--bd);background:var(--bg)}
+.wb{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+main{padding-bottom:100px}
+#rqs{position:fixed;left:0;right:0;bottom:0;z-index:1200;background:#c8102e;color:#fff;padding:9px 14px calc(9px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;font-size:14px;cursor:pointer}
+#rqk{position:absolute;left:12px;top:-21px;height:21px;line-height:19px;padding:0 10px;background:#c8102e;color:#fff;border:1px solid #fff;border-bottom:0;border-radius:8px 8px 0 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;animation:blk 1s step-end infinite}
+#rqm{position:relative;flex:1;height:22px;overflow:hidden}
+#rqt{position:absolute;left:0;top:0;white-space:nowrap;line-height:22px;transform:translateX(100vw)}
+#rqs a{color:#fff;text-decoration:underline}
+@keyframes blk{50%{opacity:.2}}
+@keyframes rqs{from{transform:translateX(var(--cw))}to{transform:translateX(-100%)}}
+.w-pk.est{font-size:44px}
+@keyframes wb{0%{background:#e00000;border-color:#ff1a1a}50%{background:var(--wbg);border-color:#2b3340}}
+.watch.alert{animation:wb 1s step-end infinite}
+.talert{border-radius:10px;padding:9px 11px;margin-top:8px;font-size:14px;background:var(--bg);border:1px solid var(--bd)}
+.talert.on{background:#c8102e;color:#fff;font-weight:600;border-color:#c8102e}
+.talert.warn{background:#8a5a00;color:#fff;border-color:#8a5a00}
+@keyframes gb{50%{opacity:.15}}
+.gblink span{display:block;width:16px;height:16px;border-radius:50%;background:#1fbf4a;border:2px solid #fff;box-shadow:0 0 0 2px #1fbf4a;animation:gb 1s step-end infinite}
+.urg{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px}
+.urg button{display:flex;flex-direction:column;align-items:center;padding:10px 6px;border:2px solid #c8102e;border-radius:10px;min-height:64px}
+.urg button b{font-size:22px;line-height:1.1}
+.urg button span{font-size:11px;color:var(--mut);text-align:center}
+@keyframes ub{50%{background:#7a0a1c}}
+.urg button.arm{background:#c8102e;color:#fff;animation:ub 1s step-end infinite}
+.urg button.arm span{color:#fff}
+#splash{position:fixed;inset:0;z-index:3000;background:#0b0f16;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;transition:opacity .5s}
+#splash img{background:#fff;padding:14px 22px;border-radius:14px;max-width:70%;max-height:28%}
+#splash .t{font-size:34px;font-weight:700;letter-spacing:.02em}
+#splash .n{font-size:18px}
+#splash .s{font-size:12px;opacity:.6}
+#posbtn{width:100%;min-height:56px;font-size:18px;font-weight:700;background:#14a44d;color:#fff;border:2px solid #0e7a39;border-radius:12px;margin-bottom:10px}
+.smsbox{border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px;background:var(--bg)}
+.smsbox div.l{margin-bottom:6px}
+.gl{color:#14a44d;font-weight:600;word-break:break-all}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<div id="splash"><img src="logo-sncf.png" alt="" onerror="this.style.display='none'"><div class="t">PK SNCF</div><div class="n">Créateur : Yann Hochet</div><div class="s">Application non officielle</div></div>
+<main>
+<section style="display:grid;gap:16px">
+  <div class="card">
+    <h1>PK SNCF</h1>
+    <div class="note" id="src">Chargement de la base…</div>
+    <div class="watchwrap"><div class="watch" id="watch">
+      <div class="w-line" id="wl">Ligne —</div>
+      <div class="w-pk" id="wp">0<small>+000</small></div>
+      <div class="w-sub" id="ws">Recherche du GPS…</div>
+      <div class="w-st none" id="wst">en attente</div>
+    </div></div>
+    <div class="row">
+      <button id="voice">🔇 Voix désactivée</button>
+      <button id="wbtn" title="Connecter une montre" aria-label="Connecter une montre">⌚</button>
+    </div>
+    <div class="note" id="wmsg" style="margin-top:8px"></div>
+    <div id="talert" class="talert" style="display:none"></div>
+    <div class="note" id="gpsmsg" style="margin-top:8px"></div>
+    <div class="row" id="gpsrow" style="display:none;margin-top:6px"><button class="p" id="gps">Activer le GPS</button></div>
+  </div>
+</section>
+<section style="display:grid;gap:16px">
+  <div class="card">
+    <h2>Carte · points d’accès</h2>
+    <div id="lmap"></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <input id="pkin" autocomplete="off">
+      <button class="p" id="go">Navigation vers l’accès le plus proche</button>
+    </div>
+    <div class="note" id="gomsg" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:8px"><button id="zon">Surveiller cette zone (indicatif)</button></div>
+  </div>
+</section>
+<section style="grid-column:1/-1">
+  <div class="card">
+    <h2>Urgences · appuie deux fois pour appeler</h2>
+    <button id="posbtn">📍 Donner votre position</button>
+    <div id="posbox" class="smsbox" style="display:none">
+      <div id="smstxt"></div>
+      <div class="row" style="margin-top:8px"><button class="p" id="smssend">Envoyer par SMS</button><button id="smscopy">Copier</button></div>
+    </div>
+    <div class="urg" id="urg"></div>
+  </div>
+</section>
+</main>
+<div id="rqs" role="region" aria-label="Les règles qui sauvent"><div id="rqk">Règles qui sauvent</div><div id="rqm"><span id="rqt"></span></div><a href="https://www.groupe-sncf.com/medias-publics/2025-07/regles-qui-sauvent-hexafret.pdf?VersionId=F8pJY7eU1.HJiGimpkSx6wl4D_1y2B8M" target="_blank" rel="noopener">PDF</a></div>
+<script>
+(function(){
+  var lines={}, loading=true, decimal=false, watchId=null, cur=null, last=null, lastHm=null, voiceOn=false, acces=[], map=null, me=null, first=true, DEF='930000';
+  var $=function(i){return document.getElementById(i)};
+  var PK_OFFSET=0.020; /* calibrage : +20 m sur tous les PK affichés */
+  var sp=$('splash');function hideSplash(){sp.style.opacity='0';setTimeout(function(){sp.style.display='none'},500)}sp.onclick=hideSplash;setTimeout(hideSplash,3000);
+  var grid=new Map(),CS=0.05;
+  function gk(i,j){return (i+5000)*20000+(j+5000)}
+  function buildGrid(){
+    grid=new Map();
+    Object.keys(lines).forEach(function(k){var L=lines[k];for(var i=0;i<L.length;i++){var p=L[i];p.i=i;var key=gk(Math.floor(p.lat/CS),Math.floor(p.lon/CS));var a=grid.get(key);if(a)a.push(p);else grid.set(key,[p])}});
+  }
+  function locate(lat,lon,only){
+    var k=Math.cos(lat*Math.PI/180),best=null,ci=Math.floor(lat/CS),cj=Math.floor(lon/CS);
+    function X(p){return (p.lon-lon)*111.32*k}
+    function Y(p){return (p.lat-lat)*110.57}
+    function tryPt(p){if(only&&p.l!==only)return;var x=X(p),y=Y(p),d=Math.sqrt(x*x+y*y);if(!best||d<best.d)best={d:d,l:p.l,pk:p.pk}}
+    function trySeg(a,b){if(only&&a.l!==only)return;
+      if(b.pk-a.pk>5||b.pk<a.pk)return;
+      var ax=X(a),ay=Y(a),dx=X(b)-ax,dy=Y(b)-ay,len2=dx*dx+dy*dy;if(len2<=0)return;
+      var t=Math.max(0,Math.min(1,-(ax*dx+ay*dy)/len2)),qx=ax+t*dx,qy=ay+t*dy,dd=Math.sqrt(qx*qx+qy*qy);
+      if(!best||dd<best.d)best={d:dd,l:a.l,pk:a.pk+t*(b.pk-a.pk)};
+    }
+    for(var r=0;r<=6;r++){
+      for(var di=-r;di<=r;di++)for(var dj=-r;dj<=r;dj++){
+        if(Math.max(Math.abs(di),Math.abs(dj))!==r)continue;
+        var a=grid.get(gk(ci+di,cj+dj));if(!a)continue;
+        for(var n=0;n<a.length;n++){var p=a[n],L=lines[p.l];tryPt(p);if(p.i>0)trySeg(L[p.i-1],p);if(p.i<L.length-1)trySeg(p,L[p.i+1])}
+      }
+      if(best&&best.d<=r*CS*110*k)break;
+    }
+    if(best)best.d*=1000;
+    return best;
+  }
+  function fmtPk(pk){
+    var km=Math.floor(pk),m=Math.round((pk-km)*1000);
+    if(m===1000){km++;m=0}
+    if(decimal)return km+','+String(m).padStart(3,'0');
+    return km+'+'+String(m).padStart(3,'0');
+  }
+
+  function pkNum(v){
+    if(v==null||v==='')return NaN;
+    if(typeof v==='number')return v;
+    v=String(v).trim();
+    var m=v.match(/^(\d+)\s*\+\s*(\d+)$/);
+    if(m)return parseInt(m[1],10)+parseInt(m[2],10)/1000;
+    return parseFloat(v.replace(',','.'));
+  }
+  
+  function setData(arr){
+    lines={};
+    arr.forEach(function(p){(lines[p.l]=lines[p.l]||[]).push(p)});
+    Object.keys(lines).forEach(function(k){lines[k].sort(function(x,y){return x.pk-y.pk})});
+    buildGrid();
+    $('src').textContent='Base SNCF · '+arr.length.toLocaleString('fr-FR')+' points, '+Object.keys(lines).length+' lignes';
+  }
+  function renderPk(pk,est){
+    var p=fmtPk(pk).split(/[+,]/);
+    $('wp').classList.toggle('est',!!est);
+    $('wp').innerHTML=(est?'≈ ':'')+p[0]+'<small>+'+p[1]+'</small>';
+  }
+  /* ---------- voix ---------- */
+  function say(t){
+    if(!voiceOn||!window.speechSynthesis)return;
+    var u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';speechSynthesis.cancel();speechSynthesis.speak(u);
+  }
+  function announce(pk,est){
+    if(pk<0)return;
+    var hm=Math.floor(pk*10+1e-6);
+    if(hm===lastHm)return;
+    lastHm=hm;
+    var km=Math.floor(hm/10),m=(hm%10)*100;
+    say((est?'Environ ':'')+'PK '+km+(m?', '+m+' mètres':' pile'));
+    sendWatch((est?'PK~ ':'PK ')+km+'+'+String(m).padStart(3,'0')+(est?' est':''));
+  }
+  $('voice').onclick=function(){
+    voiceOn=!voiceOn;
+    $('voice').textContent=voiceOn?'🔊 Voix activée':'🔇 Voix désactivée';
+    if(voiceOn){lastHm=null;say('Annonces vocales activées')}else if(window.speechSynthesis)speechSynthesis.cancel();
+  };
+  /* ---------- carte ---------- */
+  function initMap(){
+    if(!window.L)return;
+    map=L.map('lmap',{preferCanvas:true}).setView([46.6,2.4],6);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+  }
+  function drawLine(){
+    if(!map||!lines[DEF])return;
+    var L0=lines[DEF],ll=[];for(var i=0;i<L0.length;i+=3)ll.push([L0[i].lat,L0[i].lon]);
+    var pl=L.polyline(ll,{color:'#667085',weight:3}).addTo(map);
+    if(first)map.fitBounds(pl.getBounds());
+  }
+  function navUrl(a){return 'https://www.google.com/maps/dir/?api=1&destination='+a.lat+','+a.lon+'&travelmode=driving&dir_action=navigate'}
+  function drawAcces(){
+    acces.forEach(function(a){
+      if(a.pk==null){var r=locate(a.lat,a.lon,DEF);a.pk=r?r.pk:null}
+      if(map)L.circleMarker([a.lat,a.lon],{radius:5,color:'#fff',weight:1,fillColor:'#1d6fe0',fillOpacity:1}).addTo(map)
+        .bindPopup('<b>'+a.n+'</b>'+(a.pk!=null?'<br>PK '+fmtPk(a.pk)+(a.l?' · ligne '+a.l:''):'')+'<br><a href="'+navUrl(a)+'" target="_blank">Y aller</a>');
+    });
+  }
+  function moveMap(lat,lon){
+    if(!map)return;
+    if(!me)me=L.circleMarker([lat,lon],{radius:9,color:'#fff',weight:3,fillColor:'#c8102e',fillOpacity:1}).addTo(map);
+    me.setLatLng([lat,lon]);
+    if(first){map.setView([lat,lon],14);first=false}else if(!holdMap)map.panTo([lat,lon]);
+  }
+  /* ---------- position ---------- */
+  function onFix(lat,lon,spd){
+    last=[lat,lon];
+    if(loading)return;
+    var now=Date.now(),r=locate(lat,lon),st=$('wst');cur=r;if(r)r.pk+=PK_OFFSET;
+    if(lost)exitLost();
+    moveMap(lat,lon);
+    if(!r||r.d>=300){lastFix=null}
+    if(!r){$('wl').textContent='Ligne —';$('ws').textContent='aucune ligne à moins de 30 km';st.className='w-st none';st.textContent='hors ligne';return}
+    $('wl').textContent='Ligne '+r.l;
+    renderPk(r.pk,false);
+    $('ws').textContent='à '+Math.round(r.d)+' m de la voie';
+    if(r.d<150){st.className='w-st';st.textContent='sur la ligne'}
+    else if(r.d<1000){st.className='w-st off';st.textContent='proche de la ligne'}
+    else{st.className='w-st none';st.textContent='hors ligne (>1 km)'}
+    if(r.d<300){
+      var dir=lastFix?lastFix.dir:1;
+      if(lastFix&&lastFix.l===r.l&&Math.abs(r.pk-lastFix.pk)>0.003)dir=r.pk>lastFix.pk?1:-1;
+      var v=(spd!=null&&!isNaN(spd))?spd:(lastFix&&now>lastFix.t?Math.abs(r.pk-lastFix.pk)*1000/((now-lastFix.t)/1000):0);
+      if(lastFix)v=0.6*v+0.4*lastFix.v;
+      lastFix={t:now,pk:r.pk,l:r.l,dir:dir,v:v};
+      announce(r.pk,false);
+    }
+  }
+    function startGps(){
+    if(!navigator.geolocation){$('gpsmsg').textContent='GPS indisponible dans ce navigateur.';return}
+    if(watchId!==null)navigator.geolocation.clearWatch(watchId);
+    $('gpsmsg').textContent='Recherche de la position…';
+    watchId=navigator.geolocation.watchPosition(function(p){
+      $('gpsrow').style.display='none';
+      $('gpsmsg').textContent='GPS actif · précision ±'+Math.round(p.coords.accuracy)+' m'+(p.coords.accuracy>200?' (peu précis)':'');
+      lastAcc=p.coords.accuracy;onFix(p.coords.latitude,p.coords.longitude,p.coords.speed);
+    },function(e){
+      if(e.code===1){$('gpsrow').style.display='';$('gpsmsg').textContent='Localisation refusée : autorise-la dans les réglages du site, puis touche le bouton.'}
+      else if(!lastFix&&!lost)$('gpsmsg').textContent='GPS indisponible pour le moment ('+e.message+').';
+    },{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+  }
+  $('gps').onclick=startGps;
+  /* ---------- navigation vers un PK ---------- */
+  function posAtPk(line,pk){
+    var L0=lines[line];if(!L0||!L0.length||pk<L0[0].pk||pk>L0[L0.length-1].pk)return null;
+    var lo=0,hi=L0.length-1;while(lo<hi){var m=(lo+hi)>>1;if(L0[m].pk<pk)lo=m+1;else hi=m}
+    var b=L0[lo],a=L0[Math.max(0,lo-1)],t=b.pk>a.pk?(pk-a.pk)/(b.pk-a.pk):0;
+    return {lat:a.lat+(b.lat-a.lat)*t,lon:a.lon+(b.lon-a.lon)*t};
+  }
+  var holdMap=false,gMk=null,tMk=null,gTimer=null;
+  function findAccess(v){
+    if(isNaN(v))return {err:'Saisis un PK valide.'};
+    if(loading)return {err:'Base en cours de chargement…'};
+    var line=cur&&cur.d<2000?cur.l:DEF,pos=posAtPk(line,v-PK_OFFSET);
+    if(!pos){var L0=lines[line]||[];return {err:'PK hors de la ligne '+line+(L0.length?' (de '+L0[0].pk+' à '+L0[L0.length-1].pk+')':'')+'.'}}
+    if(!acces.length)return {err:'Aucun point d’accès chargé.'};
+    var k=Math.cos(pos.lat*Math.PI/180),best=null;
+    acces.forEach(function(a){var d=Math.hypot((a.lon-pos.lon)*111.32*k,(a.lat-pos.lat)*110.57);if(!best||d<best.d)best={d:d,a:a}});
+    return {a:best.a,d:best.d,pos:pos,line:line};
+  }
+  function clearTarget(){
+    holdMap=false;
+    if(map){if(gMk){map.removeLayer(gMk);gMk=null}if(tMk){map.removeLayer(tMk);tMk=null}}
+  }
+  function showTarget(){
+    clearTarget();$('gomsg').textContent='';
+    if(!map||!$('pkin').value.trim())return;
+    var v=parsePk($('pkin').value);if(isNaN(v))return;
+    var r=findAccess(v);
+    if(r.err){$('gomsg').textContent=r.err;return}
+    tMk=L.circleMarker([r.pos.lat,r.pos.lon],{radius:6,color:'#111',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(map).bindTooltip('PK '+fmtPk(v),{direction:'bottom'});
+    gMk=L.marker([r.a.lat,r.a.lon],{icon:L.divIcon({className:'gblink',html:'<span></span>',iconSize:[20,20]}),zIndexOffset:1000}).addTo(map).bindTooltip(r.a.n+' · PK '+fmtPk(r.a.pk),{permanent:true,direction:'top',offset:[0,-8]});
+    holdMap=true;
+    map.fitBounds([[r.pos.lat,r.pos.lon],[r.a.lat,r.a.lon]],{maxZoom:15,padding:[40,40]});
+  }
+  $('pkin').addEventListener('input',function(){clearTimeout(gTimer);gTimer=setTimeout(showTarget,450)});
+  $('go').onclick=function(){
+    var r=findAccess(parsePk($('pkin').value));
+    if(r.err){$('gomsg').textContent=r.err;return}
+    window.open(navUrl(r.a),'_blank');
+  };
+  /* ---------- saisie PK ---------- */
+  function parsePk(t){
+    t=String(t).trim();
+    if(!t||/[^0-9 +.,]/.test(t))return NaN;
+    t=t.replace(',','.');
+    var m=t.match(/^(\d+)\s*\+\s*(\d{1,3})$/);
+    if(m)return +m[1]+(+m[2])/1000;
+    if(/^\d+\.\d+$/.test(t))return parseFloat(t);
+    var d=t.replace(/\s/g,'');
+    if(/^\d+$/.test(d))return d.length>3?parseInt(d,10)/1000:parseInt(d,10);
+    return NaN;
+  }
+  $('pkin').oninput=function(){this.value=this.value.replace(/[^0-9 +.,]/g,'')};
+  /* ---------- montre ---------- */
+  var wMode=null,wChar=null,wDev=null;
+  function wset(t){$('wmsg').textContent=t}
+  function sendWatch(text){
+    if(!wMode)return;
+    var t=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(wMode==='ble'&&wChar){
+      var b=new Uint8Array([0,1].concat(Array.from(new TextEncoder().encode(t.slice(0,18)))));
+      wChar.writeValue(b).catch(function(e){wset('Envoi à la montre impossible : '+e.message)});
+    }else if(wMode==='notif'&&navigator.serviceWorker){
+      navigator.serviceWorker.ready.then(function(reg){reg.showNotification(t,{tag:'pk',renotify:false,silent:true,icon:'icon-192.png',body:cur?('Ligne '+cur.l):''})}).catch(function(){});
+    }
+  }
+  $('wbtn').onclick=async function(){
+    if(wMode){wMode=null;wChar=null;if(wDev&&wDev.gatt&&wDev.gatt.connected)wDev.gatt.disconnect();$('wbtn').textContent='⌚';wset('Envoi vers la montre désactivé.');return}
+    var ble=!!navigator.bluetooth&&confirm('Connecter une montre en Bluetooth ?\nOK = Bluetooth (BLE)\nAnnuler = notifications du téléphone (reprises par la montre)');
+    if(ble){
+      try{
+        wDev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[0x1811]});
+        wset('Connexion à '+(wDev.name||'la montre')+'…');
+        var srv=await wDev.gatt.connect();
+        wDev.addEventListener('gattserverdisconnected',function(){wMode=null;wChar=null;$('wbtn').textContent='⌚';wset('Montre déconnectée.')});
+        var svc=await srv.getPrimaryService(0x1811);
+        wChar=await svc.getCharacteristic(0x2a46);
+        wMode='ble';$('wbtn').textContent='⌚✓';wset('Montre connectée : '+(wDev.name||'')+'. Un PK est envoyé tous les 100 m.');
+        sendWatch('PK connecte');
+      }catch(e){
+        wset('Bluetooth : '+(e.name==='NotFoundError'?'aucune montre choisie, ou cette montre n’accepte pas les alertes texte.':e.message)+' Essaie les notifications.');
+      }
+      return;
+    }
+    if(!('Notification' in window)){wset('Notifications indisponibles sur cet appareil.');return}
+    var p=await Notification.requestPermission();
+    if(p!=='granted'){wset('Notifications refusées : autorise-les dans les réglages du site.');return}
+    wMode='notif';$('wbtn').textContent='⌚✓';
+    wset('Notifications activées : la montre les affiche si elle est liée au téléphone.');
+    sendWatch('PK '+(cur?fmtPk(cur.pk):'0+000'));
+  };
+  /* ---------- perte GPS + estimation ---------- */
+  var lastFix=null,lost=false,lostT=0,estKm=0,tickT=Date.now(),lastMoveT=Date.now(),accelOk=false,samples=[];
+  function enterLost(){
+    lost=true;lostT=Date.now();estKm=0;tickT=lostT;
+    $('gpsmsg').textContent='⚠ Signal GPS perdu : PK estimé avec l’accéléromètre, valeur approximative.';
+    var st=$('wst');st.className='w-st off';st.textContent='GPS perdu · estimé';
+    say('Signal GPS perdu. PK estimé.');sendWatch('GPS PERDU');
+  }
+  function exitLost(){lost=false;$('gpsmsg').textContent='GPS retrouvé.';say('GPS retrouvé')}
+  setInterval(function(){
+    if(!lastFix||loading)return;
+    var now=Date.now();
+    if(!lost){if(now-lastFix.t>10000)enterLost();else return}
+    var dt=Math.min((now-tickT)/1000,5);tickT=now;
+    var moving=!accelOk||now-lastMoveT<4000;
+    estKm+=(moving?lastFix.v:0)*dt/1000;
+    var L0=lines[lastFix.l],pk=lastFix.pk+lastFix.dir*estKm;
+    if(L0&&L0.length)pk=Math.max(L0[0].pk+PK_OFFSET,Math.min(L0[L0.length-1].pk+PK_OFFSET,pk));
+    renderPk(pk,true);estNow=pk;
+    $('ws').textContent='estimé · '+Math.round((now-lostT)/1000)+' s sans GPS'+(moving?'':' · à l’arrêt');
+    announce(pk,true);
+  },1000);
+  if(window.DeviceMotionEvent)window.addEventListener('devicemotion',function(e){
+    var a=e.accelerationIncludingGravity;if(!a||a.x==null)return;
+    accelOk=true;var t=Date.now();
+    samples.push([t,Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)]);
+    while(samples.length&&t-samples[0][0]>2000)samples.shift();
+    if(samples.length>10){var m=0,q=0;samples.forEach(function(x){m+=x[1]});m/=samples.length;samples.forEach(function(x){q+=(x[1]-m)*(x[1]-m)});if(Math.sqrt(q/samples.length)>0.06)lastMoveT=t}
+  });
+  /* ---------- surveillance de zone (INDICATIF, voyageurs seulement) ---------- */
+  var SIRI='https://proxy.transport.data.gouv.fr/resource/sncf-siri-lite-estimated-timetable';
+  var ALERT_MIN=20,ZONE_KM=0.5,VOIE={inc:null,dec:null}; /* VOIE ex. {inc:'1',dec:'2'} */
+  var feedN=0,gares=null,zoneOn=false,zonePk=null,journeys=[],feedT=0,feedErr='',zTimer=null,fTimer=null,zKey='';
+  function loadGares(){return gares?Promise.resolve(gares):fetch('gares.json').then(function(r){return r.json()}).then(function(a){gares={};a.forEach(function(g){gares[g.u]=g});return gares})}
+  function tms(x){var t=Date.parse(x);return isNaN(t)?null:t}
+  function walk(o,out){
+    if(!o||typeof o!=='object')return;
+    if(Array.isArray(o)){o.forEach(function(x){walk(x,out)});return}
+    if(o.EstimatedCalls){out.push(o);return}
+    for(var k in o)walk(o[k],out);
+  }
+  function xmlJ(t){
+    var d=new DOMParser().parseFromString(t,'application/xml');
+    if(d.getElementsByTagName('parsererror').length)throw new Error('XML illisible');
+    function g(el,n){var e=el.getElementsByTagNameNS('*',n)[0];return e?e.textContent.trim():''}
+    var out=[];
+    Array.prototype.forEach.call(d.getElementsByTagNameNS('*','EstimatedVehicleJourney'),function(j){
+      var cs=[];
+      Array.prototype.forEach.call(j.getElementsByTagNameNS('*','EstimatedCall'),function(c){
+        cs.push({StopPointRef:g(c,'StopPointRef'),ExpectedArrivalTime:g(c,'ExpectedArrivalTime'),AimedArrivalTime:g(c,'AimedArrivalTime'),ExpectedDepartureTime:g(c,'ExpectedDepartureTime'),AimedDepartureTime:g(c,'AimedDepartureTime')});
+      });
+      out.push({EstimatedCalls:cs,DatedVehicleJourneyRef:g(j,'DatedVehicleJourneyRef')||g(j,'VehicleJourneyRef')||g(j,'LineRef')});
+    });
+    return out;
+  }
+  function parseJ(j){
+    var cs=j.EstimatedCalls;if(cs&&cs.EstimatedCall)cs=cs.EstimatedCall;if(!Array.isArray(cs))cs=cs?[cs]:[];
+    var st=[];
+    cs.forEach(function(c){
+      var r=c.StopPointRef,u=(typeof r==='object'?JSON.stringify(r):String(r)).match(/87\d{6}/),g=u&&gares[u[0]];
+      if(!g)return;
+      st.push({pk:g.pk,n:g.n,a:tms(c.ExpectedArrivalTime||c.AimedArrivalTime),d:tms(c.ExpectedDepartureTime||c.AimedDepartureTime)});
+    });
+    var id=j.DatedVehicleJourneyRef||j.VehicleJourneyRef||j.TrainNumbers||j.LineRef||'?';
+    return {id:typeof id==='object'?JSON.stringify(id):String(id),st:st};
+  }
+  function evalZone(){
+    var now=Date.now(),c=[];
+    journeys.forEach(function(j){
+      for(var i=0;i+1<j.st.length;i++){
+        var a=j.st[i],b=j.st[i+1];if(a.pk===b.pk)continue;
+        if(zonePk<Math.min(a.pk,b.pk)||zonePk>Math.max(a.pk,b.pk))continue;
+        var t0=a.d||a.a,t1=b.a||b.d;if(!t0||!t1)continue;
+        c.push({t:t0+(zonePk-a.pk)/(b.pk-a.pk)*(t1-t0),dir:b.pk>a.pk?1:-1,id:j.id});
+      }
+    });
+    c.sort(function(x,y){return x.t-y.t});
+    return c.filter(function(x){return x.t>now-3*60000&&x.t<now+60*60000});
+  }
+  function sensTxt(d){return (d>0?'sens PK croissant (vers Menton)':'sens PK décroissant (vers Marseille)')+(VOIE[d>0?'inc':'dec']?', voie '+VOIE[d>0?'inc':'dec']:'')}
+  function hhmm(t){return new Date(t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+  function renderZone(){
+    var box=$('talert'),w=$('watch');
+    if(!zoneOn){box.style.display='none';w.classList.remove('alert');return}
+    box.style.display='';
+    var now=Date.now(),zl='Zone PK '+fmtPk(zonePk)+' ±'+ZONE_KM*1000+' m (ligne 930000)';
+    if(!feedT&&!feedErr){box.className='talert';box.textContent=zl+' : chargement des horaires…';w.classList.remove('alert');return}
+    if(feedErr||now-feedT>6*60000){
+      box.className='talert warn';w.classList.remove('alert');
+      box.textContent=zl+' : surveillance indisponible ('+(feedErr||'données trop anciennes')+'). Aucune détection : ne pas en déduire que la zone est libre.';
+      return;
+    }
+    var c=evalZone(),near=c.filter(function(x){return x.t<=now+ALERT_MIN*60000});
+    if(near.length){
+      box.className='talert on';w.classList.add('alert');
+      box.textContent='⚠ TRAIN POTENTIEL DANS LA ZONE : '+near.map(function(x){return '≈ '+Math.max(0,Math.round((x.t-now)/60000))+' min (vers '+hhmm(x.t)+'), '+sensTxt(x.dir)}).join(' · ')+'. Indicatif : voyageurs seulement, ne remplace pas la protection.';
+      var key=near.map(function(x){return x.id}).join('|');
+      if(key!==zKey){zKey=key;var mn=Math.max(0,Math.round((near[0].t-now)/60000));say('Attention, train potentiel dans la zone dans '+mn+' minutes, '+sensTxt(near[0].dir));sendWatch('TRAIN ~'+mn+' min')}
+    }else{
+      zKey='';box.className='talert';w.classList.remove('alert');
+      box.textContent=zl+' : '+(c.length?'prochain train de voyageurs estimé vers '+hhmm(c[0].t)+' (≈ '+Math.round((c[0].t-now)/60000)+' min), '+sensTxt(c[0].dir)+'. ':'aucun train de voyageurs prévu dans l’heure. ')+'Indicatif : fret, maintenance et circulations spéciales ne sont pas visibles. Ne pas en déduire que la zone est libre. ['+feedN+' trajets lus, '+journeys.length+' passant par la ligne]';
+    }
+  }
+  function pull(){
+    fetch(SIRI,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}).then(function(t){
+      var out=[],tt=t.replace(/^\uFEFF/,'').trim();
+      if(tt.charAt(0)==='<'){out=xmlJ(tt)}else{var j;try{j=JSON.parse(tt)}catch(e){throw new Error('format inattendu, début du flux : '+tt.slice(0,60))}walk(j,out)}
+      
+      if(!out.length)throw new Error('aucun trajet reconnu dans le flux (début : '+tt.slice(0,80)+')');
+      var all=out.map(parseJ);feedN=all.length;journeys=all.filter(function(x){return x.st.length>1});feedT=Date.now();feedErr='';renderZone();
+    }).catch(function(e){feedErr=e.name==='TypeError'?'flux inaccessible depuis l’appli (réseau ou blocage du navigateur)':e.message;renderZone()});
+  }
+  $('zon').onclick=function(){
+    if(zoneOn){zoneOn=false;clearInterval(zTimer);clearInterval(fTimer);$('zon').textContent='Surveiller cette zone (indicatif)';renderZone();return}
+    var v=parsePk($('pkin').value);if(isNaN(v)){$('gomsg').textContent='Saisis d’abord un PK dans la case.';return}
+    zonePk=v;zoneOn=true;zKey='';feedErr='';feedT=0;$('zon').textContent='Arrêter la surveillance';renderZone();
+    loadGares().then(function(){pull();fTimer=setInterval(pull,120000);zTimer=setInterval(renderZone,15000)}).catch(function(){feedErr='liste des gares indisponible';renderZone()});
+  };
+  /* ---------- donner sa position (SMS) ---------- */
+  var estNow=null,lastAcc=null,posTxt='';
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function buildPos(){
+    if(!last)return null;
+    var lat=last[0],lon=last[1],now=new Date(),T=[],H=[];
+    function add(t,h){T.push(t);H.push('<div class="l">'+(h||esc(t))+'</div>')}
+    var pk=lost&&estNow!=null?estNow:(cur?cur.pk:null);
+    var pt=cur&&cur.d<300&&pk!=null?('Ligne '+cur.l+', PK '+fmtPk(pk)+(lost?' (estimé)':'')):'hors ligne';
+    add('Ma position à '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' : '+pt);
+    add('GPS : '+lat.toFixed(5)+', '+lon.toFixed(5)+(lastAcc!=null?' (±'+Math.round(lastAcc)+' m)':'')+(lost?' - signal GPS perdu, dernière position connue':''));
+    var best=null,k=Math.cos(lat*Math.PI/180);
+    acces.forEach(function(a){var d=Math.hypot((a.lon-lon)*111.32*k,(a.lat-lat)*110.57)*1000;if(!best||d<best.d)best={d:d,a:a}});
+    if(best){
+      var ds=best.d<1000?Math.round(best.d)+' m':(best.d/1000).toFixed(1).replace('.',',')+' km',nu=navUrl(best.a);
+      add('Accès le plus proche : '+best.a.n+', PK '+fmtPk(best.a.pk)+', à '+ds+' à vol d’oiseau');
+      var pu='https://www.google.com/maps?q='+lat.toFixed(6)+','+lon.toFixed(6);
+      T.push('Ma position : '+pu);H.push('<div class="l">Ma position : <a class="gl" href="'+pu+'" target="_blank" rel="noopener">'+esc(pu)+'</a></div>');
+      T.push('Itinéraire vers l’accès : '+nu);H.push('<div class="l">Itinéraire vers l’accès : <a class="gl" href="'+nu+'" target="_blank" rel="noopener">'+esc(nu)+'</a></div>');
+    }else{
+      var pu2='https://www.google.com/maps?q='+lat.toFixed(6)+','+lon.toFixed(6);
+      T.push('Ma position : '+pu2);H.push('<div class="l">Ma position : <a class="gl" href="'+pu2+'" target="_blank" rel="noopener">'+esc(pu2)+'</a></div>');
+    }
+    return {text:T.join('\n'),html:H.join('')};
+  }
+  $('posbtn').onclick=function(){
+    var m=buildPos();$('posbox').style.display='';
+    if(!m){$('smstxt').textContent='Position GPS indisponible pour le moment.';posTxt='';return}
+    $('smstxt').innerHTML=m.html;posTxt=m.text;
+  };
+  $('smssend').onclick=function(){if(posTxt)location.href='sms:?&body='+encodeURIComponent(posTxt)};
+  $('smscopy').onclick=function(){
+    var b=$('smscopy');if(!posTxt)return;
+    (navigator.clipboard?navigator.clipboard.writeText(posTxt):Promise.reject()).then(function(){b.textContent='Copié ✓'},function(){b.textContent='Copie impossible'});
+    setTimeout(function(){b.textContent='Copier'},2000);
+  };
+  /* ---------- urgences : double appui ---------- */
+  var EMERG=[['112','Urgences'],['15','SAMU'],['17','Police'],['18','Pompiers'],['3117','Sûreté SNCF'],['31177','SMS Sûreté','sms:']],armed=null,armT=null;
+  function disarm(){if(armed){armed.classList.remove('arm');armed.lastChild.textContent=armed.dataset.l;armed=null}clearTimeout(armT)}
+  EMERG.forEach(function(e){
+    var b=document.createElement('button');b.dataset.l=e[1];b.dataset.n=e[0];
+    b.innerHTML='<b>'+e[0]+'</b><span>'+e[1]+'</span>';
+    b.onclick=function(){
+      if(armed===b){disarm();location.href=(e[2]||'tel:')+e[0];return}
+      disarm();armed=b;b.classList.add('arm');b.lastChild.textContent=e[2]?'Touche encore pour écrire':'Touche encore pour appeler';
+      armT=setTimeout(disarm,4000);
+    };
+    $('urg').appendChild(b);
+  });
+  /* ---------- démarrage ---------- */
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
+  initMap();
+  startGps();
+  fetch('pks.json').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
+    var arr=[];
+    j.l.forEach(function(L){var pk=0,la=0,lo=0;for(var i=0;i<L.p.length;i++){pk+=L.p[i];la+=L.a[i];lo+=L.o[i];arr.push({l:L.c,pk:pk/1000,lat:la/1e5,lon:lo/1e5})}});
+    setData(arr);
+    return fetch('acces.json').then(function(r){return r.ok?r.json():[]}).catch(function(){return[]});
+  }).then(function(a){
+    acces=a||[];loading=false;
+    drawLine();drawAcces();
+    if(last)onFix(last[0],last[1]);
+  }).catch(function(){$('src').textContent='Base SNCF indisponible (réseau ?)'});
+  var RQS=["Je ne réalise que les missions pour lesquelles je suis habilité(e) ou autorisé(e).", "J’utilise toujours, et correctement, les EPI et agrès adaptés à ma mission.", "Je ne travaille jamais après avoir consommé alcool, stupéfiants ou produit altérant ma concentration.", "Je prends toujours en compte le risque ferroviaire et je respecte les distances de sécurité.", "Conduire ou téléphoner : je choisis.", "Avant toute manœuvre, je fais un briefing et je m’assure d’être compris.", "Aucun appareil qui peut me distraire dans mes déplacements ou en intervention dans les voies.", "Toute installation électrique est sous tension : j’ai la ou les clés de chauffage sur moi avant de toucher le câblot.", "Avant d’entrer dans l’attelage : arrêt des véhicules, contact des tampons, autorisation obtenue.", "Toujours 3 points d’appui pour monter et descendre d’un véhicule."],IC=['🪪','🦺','🚫🍺','🚆','📵','🗣️','🎧','⚡','🔗','🪜'],ri=0,rt=$('rqt');
+  function showR(){
+    rt.textContent=IC[ri]+'  '+RQS[ri];
+    rt.style.animation='none';void rt.offsetWidth;
+    var c=$('rqm').offsetWidth,w=rt.offsetWidth;
+    rt.style.setProperty('--cw',c+'px');
+    rt.style.animation='rqs '+((w+c)/60)+'s linear forwards';
+  }
+  function nextR(){ri=(ri+1)%RQS.length;showR()}
+  rt.addEventListener('animationend',nextR);
+  $('rqs').onclick=function(e){if(e.target.tagName!=='A')nextR()};
+  showR();
+})();
+</script>
+</body>
+</html>
