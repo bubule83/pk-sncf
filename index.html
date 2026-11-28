@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compagnon</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8102e">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5f7;--card:#fff;--tx:#14181f;--mut:#667085;--ac:#c8102e;--wbg:#0b0f16;--wtx:#fff;--bd:#d9dde3}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1318;--card:#181d25;--tx:#eef0f4;--mut:#98a2b3;--bd:#2a313c;--wbg:#000}}
+:root[data-theme="dark"]{--bg:#0f1318;--card:#181d25;--tx:#eef0f4;--mut:#98a2b3;--bd:#2a313c;--wbg:#000}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:800px){main{grid-template-columns:340px minmax(0,1fr)}}
+h1{font-size:18px;margin:0 0 2px}h2{font-size:14px;margin:0 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.watchwrap{display:flex;justify-content:center;padding:6px 0 12px}
+.watch{width:260px;height:260px;border-radius:50%;background:var(--wbg);color:var(--wtx);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:8px solid #2b3340;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.watch.sq{border-radius:34px}
+.w-line{font-size:14px;opacity:.75;letter-spacing:.03em}
+.w-pk{font-size:56px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.w-pk small{font-size:22px;font-weight:600;opacity:.8}
+.w-sub{font-size:13px;opacity:.7;margin-top:4px}
+.w-st{margin-top:8px;font-size:12px;padding:2px 10px;border-radius:20px;background:#1f7a3d}
+.w-st.off{background:#8a5a00}.w-st.none{background:#444}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 3px}
+input,button,select{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:7px 10px}
+input[type=range]{width:100%;padding:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
+button{cursor:pointer}button.p{background:var(--ac);border-color:var(--ac);color:#fff}
+#map{width:100%;height:280px;background:var(--bg);border:1px solid var(--bd);border-radius:10px}
+.note{font-size:12.5px;color:var(--mut)}
+code{background:var(--bg);padding:1px 5px;border-radius:5px}
+#lmap{width:100%;height:360px;border-radius:10px;border:1px solid var(--bd);background:var(--bg)}
+.wb{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+main{padding-bottom:100px}
+#rqs{position:fixed;left:0;right:0;bottom:0;z-index:1200;background:#c8102e;color:#fff;padding:9px 14px calc(9px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;font-size:14px;cursor:pointer}
+#rqk{position:absolute;left:12px;top:-21px;height:21px;line-height:19px;padding:0 10px;background:#c8102e;color:#fff;border:1px solid #fff;border-bottom:0;border-radius:8px 8px 0 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;animation:blk 1s step-end infinite}
+#rqm{position:relative;flex:1;height:22px;overflow:hidden}
+#rqt{position:absolute;left:0;top:0;white-space:nowrap;line-height:22px;transform:translateX(100vw)}
+#rqs a{color:#fff;text-decoration:underline}
+@keyframes blk{50%{opacity:.2}}
+@keyframes rqs{from{transform:translateX(var(--cw))}to{transform:translateX(-100%)}}
+.w-pk.est{font-size:44px}
+@keyframes wb{0%{background:#e00000;border-color:#ff1a1a}50%{background:var(--wbg);border-color:#2b3340}}
+.watch.alert{animation:wb 1s step-end infinite}
+.talert{border-radius:10px;padding:9px 11px;margin-top:8px;font-size:14px;background:var(--bg);border:1px solid var(--bd)}
+.talert.on{background:#c8102e;color:#fff;font-weight:600;border-color:#c8102e}
+.talert.warn{background:#8a5a00;color:#fff;border-color:#8a5a00}
+@keyframes gb{50%{opacity:.15}}
+.gblink span{display:block;width:16px;height:16px;border-radius:50%;background:#1fbf4a;border:2px solid #fff;box-shadow:0 0 0 2px #1fbf4a;animation:gb 1s step-end infinite}
+.urg{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px}
+.urg button{display:flex;flex-direction:column;align-items:center;padding:10px 6px;border:2px solid #c8102e;border-radius:10px;min-height:64px}
+.urg button b{font-size:22px;line-height:1.1}
+.urg button span{font-size:11px;color:var(--mut);text-align:center}
+@keyframes ub{50%{background:#7a0a1c}}
+.urg button.arm{background:#c8102e;color:#fff;animation:ub 1s step-end infinite}
+.urg button.arm span{color:#fff}
+#splash{position:fixed;inset:0;z-index:3000;background:#0b0f16;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;transition:opacity .5s}
+#splash img{background:#fff;padding:14px 22px;border-radius:14px;max-width:70%;max-height:28%}
+#splash .t{font-size:34px;font-weight:700;letter-spacing:.02em}
+#splash .n{font-size:18px}
+#splash .s{font-size:12px;opacity:.6}
+#posbtn{width:100%;min-height:56px;font-size:18px;font-weight:700;background:#14a44d;color:#fff;border:2px solid #0e7a39;border-radius:12px;margin-bottom:10px}
+.smsbox{border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px;background:var(--bg)}
+.smsbox div.l{margin-bottom:6px}
+.gl{color:#14a44d;font-weight:600;word-break:break-all}
+.tdep{border-radius:10px;padding:9px 11px;margin-top:8px;font-size:14px;background:#c76a00;color:#fff;border:1px solid #c76a00}
+.tdep div{margin-bottom:4px}
+.blk{animation:blk 1s step-end infinite;margin-top:6px}
+#lmap.locked,#lmap.locked .leaflet-container{touch-action:pan-y !important}
+#lmap.active{outline:3px solid #14a44d}
+#mhint{position:absolute;left:8px;bottom:8px;z-index:1100;pointer-events:none;background:rgba(0,0,0,.65);color:#fff;font-size:12px;padding:4px 9px;border-radius:8px}
+.th{cursor:pointer;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.th::after{content:'▾';font-size:16px}
+.open>.th::after{content:'▴'}
+.talert:not(.open)>div:not(.th),.tdep:not(.open)>div:not(.th){display:none}
+.open>#tab,.open>#tdb{margin-top:6px}
+.th.blk{margin-top:0}
+#meteo{text-align:right;font-size:12px;line-height:1.4;min-width:92px;max-width:42%;color:var(--mut)}
+#meteo b{color:var(--tx);font-size:12px}
+.credits summary{cursor:pointer;font-weight:700;color:var(--mut)}
+.credits p{font-size:12.5px;color:var(--mut);margin:8px 0 0}
+.credits a{color:inherit;text-decoration:underline}
+.prow{display:flex;gap:8px;margin-bottom:10px}
+.prow button{margin-bottom:0}
+#posbtn{flex:3;width:auto}
+#photobtn{flex:1;min-height:56px;font-size:26px;border:2px solid var(--tx);border-radius:12px}
+#photoimg{max-width:100%;border-radius:8px;display:block}
+#sosbtn{width:100%;min-height:60px;font-size:20px;font-weight:700;background:#c8102e;color:#fff;border:2px solid #7a0a1c;border-radius:12px;margin-bottom:10px}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<div id="splash"><img src="logo-sncf.png" alt="" onerror="this.style.display='none'"><div class="t">Compagnon</div><div class="n">Créateur : Yann Hochet</div><div class="s">Application non officielle</div></div>
+<main>
+<section style="display:grid;gap:16px">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><h1>Compagnon</h1><div class="note" id="src">Chargement de la base…</div></div><div id="meteo"><b id="mgare">—</b><div id="mair">Air —</div><div id="mrail">Rail : n/d</div></div></div>
+    <div class="watchwrap"><div class="watch" id="watch">
+      <div class="w-line" id="wl">Ligne —</div>
+      <div class="w-pk" id="wp">0<small>+000</small></div>
+      <div class="w-sub" id="ws">Recherche du GPS…</div>
+      <div class="w-st none" id="wst">en attente</div>
+    </div></div>
+    <div class="row">
+      <button id="voice" aria-label="Son activé" title="Son activé / désactivé" style="flex:0 0 56px;min-width:56px;font-size:22px">🔊</button>
+      <button id="wbtn" title="Montre et lunettes connectées" aria-label="Montre et lunettes connectées">⌚🕶️</button>
+    </div>
+    <div class="note" id="wmsg" style="margin-top:8px"></div>
+    <div id="wmenu" class="row" style="display:none;margin-top:8px"><button id="wn">🔔 Notifications du téléphone</button><button id="wb">🔵 Bluetooth direct</button><button id="woff">⏹ Désactiver</button></div>
+    <div id="talert" class="talert" style="display:none"><div class="th" id="tah"></div><div id="tab"></div></div>
+    <div id="tdep" class="tdep" style="display:none"><div class="th" id="tdh"></div><div id="tdb"></div></div>
+    <div class="note" id="gpsmsg" style="margin-top:8px"></div>
+    <div class="row" id="gpsrow" style="display:none;margin-top:6px"><button class="p" id="gps">Activer le GPS</button></div>
+  </div>
+</section>
+<section style="display:grid;gap:16px">
+  <div class="card">
+    <h2>Carte · points d’accès</h2>
+    <div style="position:relative"><div id="lmap"></div><div id="mhint">Touche 2 fois la carte pour la manipuler</div></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <input id="pkin" autocomplete="off">
+      <button class="p" id="go">Navigation vers l’accès le plus proche</button>
+    </div>
+    <div class="note" id="gomsg" style="margin-top:8px"></div>
+    
+  </div>
+</section>
+<section style="grid-column:1/-1">
+  <div class="card">
+    <h2>Urgences</h2>
+    <div class="prow"><button id="posbtn">📍 Donner votre position</button><button id="photobtn" aria-label="Photo avec PK" title="Photo avec PK">📷</button></div>
+    <input type="file" id="photoin" accept="image/*" capture="environment" style="display:none">
+    <div id="posbox" class="smsbox" style="display:none">
+      <div id="smstxt"></div>
+      <div class="row" style="margin-top:8px"><button class="p" id="smssend">Envoyer par SMS</button><button id="smscopy">Copier</button></div>
+    </div>
+    <div id="photobox" class="smsbox" style="display:none">
+      <img id="photoimg" alt="Photo avec PK">
+      <div class="note" id="phmsg" style="margin-top:6px"></div>
+      <div class="row" style="margin-top:8px"><button class="p" id="phshare">Partager (mail, SMS, WhatsApp…)</button><button id="phsave">Enregistrer</button><button id="phclose">Fermer</button></div>
+    </div>
+    <button id="sosbtn">🆘 Appeler SOS</button>
+    <div class="note" id="urgn" style="display:none;margin-bottom:8px">Appuie deux fois sur un numéro pour appeler.</div>
+    <div class="urg" id="urg" style="display:none"></div>
+  </div>
+</section>
+<section style="grid-column:1/-1">
+  <details class="card credits">
+    <summary>Sources et licences</summary>
+    <p>Application non officielle, créée par Yann Hochet, non affiliée à la SNCF ni à SNCF Réseau. Elle est indicative et ne remplace pas les procédures de sécurité officielles.</p>
+    <p>Contient des informations issues de la Base de données SNCF OPEN DATA, mises à disposition aux conditions de la licence SNCF OPEN DATA (<a href="https://data.sncf.com/pages/licence" target="_blank" rel="noopener">data.sncf.com/pages/licence</a>) : liste des gares (SNCF Réseau) et horaires temps réel (SNCF Voyageurs, via transport.data.gouv.fr).</p>
+    <p>Points kilométriques : base reconstituée par « nicolaswurtz » (<a href="https://github.com/nicolaswurtz/extras-opendata-sncf-reseau" target="_blank" rel="noopener">github.com/nicolaswurtz/extras-opendata-sncf-reseau</a>) à partir des données ouvertes de SNCF Réseau, licence ODbL. La base dérivée publiée avec cette application (pks.json) est mise à disposition sous licence ODbL.</p>
+    <p>Points d’accès : carte « SNCF 930 ». Fond de carte © contributeurs OpenStreetMap (ODbL), bibliothèque Leaflet. Météo : <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).</p>
+    <p>Logo SNCF Réseau et jingle : droits réservés à leurs propriétaires respectifs.</p>
+  </details>
+</section>
+</main>
+<div id="rqs" role="region" aria-label="Les règles qui sauvent"><div id="rqk">Règles qui sauvent</div><div id="rqm"><span id="rqt"></span></div><a href="https://www.groupe-sncf.com/medias-publics/2025-07/regles-qui-sauvent-hexafret.pdf?VersionId=F8pJY7eU1.HJiGimpkSx6wl4D_1y2B8M" target="_blank" rel="noopener">PDF</a></div>
+<script>
+(function(){
+  var lines={}, loading=true, decimal=false, watchId=null, cur=null, last=null, lastHm=null, voiceOn=true, acces=[], map=null, me=null, first=true, DEF='930000';
+  var $=function(i){return document.getElementById(i)};
+  var PK_OFFSET=0.020; /* calibrage : +20 m sur tous les PK affichés */
+  var sp=$('splash');function hideSplash(){sp.style.opacity='0';setTimeout(function(){sp.style.display='none'},500)}sp.onclick=hideSplash;setTimeout(hideSplash,3000);
+  var grid=new Map(),CS=0.05;
+  function gk(i,j){return (i+5000)*20000+(j+5000)}
+  function buildGrid(){
+    grid=new Map();
+    Object.keys(lines).forEach(function(k){var L=lines[k];for(var i=0;i<L.length;i++){var p=L[i];p.i=i;var key=gk(Math.floor(p.lat/CS),Math.floor(p.lon/CS));var a=grid.get(key);if(a)a.push(p);else grid.set(key,[p])}});
+  }
+  function locate(lat,lon,only){
+    var k=Math.cos(lat*Math.PI/180),best=null,ci=Math.floor(lat/CS),cj=Math.floor(lon/CS);
+    function X(p){return (p.lon-lon)*111.32*k}
+    function Y(p){return (p.lat-lat)*110.57}
+    function tryPt(p){if(only&&p.l!==only)return;var x=X(p),y=Y(p),d=Math.sqrt(x*x+y*y);if(!best||d<best.d)best={d:d,l:p.l,pk:p.pk}}
+    function trySeg(a,b){if(only&&a.l!==only)return;
+      if(b.pk-a.pk>5||b.pk<a.pk)return;
+      var ax=X(a),ay=Y(a),dx=X(b)-ax,dy=Y(b)-ay,len2=dx*dx+dy*dy;if(len2<=0)return;
+      var t=Math.max(0,Math.min(1,-(ax*dx+ay*dy)/len2)),qx=ax+t*dx,qy=ay+t*dy,dd=Math.sqrt(qx*qx+qy*qy);
+      if(!best||dd<best.d)best={d:dd,l:a.l,pk:a.pk+t*(b.pk-a.pk)};
+    }
+    for(var r=0;r<=6;r++){
+      for(var di=-r;di<=r;di++)for(var dj=-r;dj<=r;dj++){
+        if(Math.max(Math.abs(di),Math.abs(dj))!==r)continue;
+        var a=grid.get(gk(ci+di,cj+dj));if(!a)continue;
+        for(var n=0;n<a.length;n++){var p=a[n],L=lines[p.l];tryPt(p);if(p.i>0)trySeg(L[p.i-1],p);if(p.i<L.length-1)trySeg(p,L[p.i+1])}
+      }
+      if(best&&best.d<=r*CS*110*k)break;
+    }
+    if(best)best.d*=1000;
+    return best;
+  }
+  function fmtPk(pk){
+    var km=Math.floor(pk),m=Math.round((pk-km)*1000);
+    if(m===1000){km++;m=0}
+    if(decimal)return km+','+String(m).padStart(3,'0');
+    return km+'+'+String(m).padStart(3,'0');
+  }
+
+  function pkNum(v){
+    if(v==null||v==='')return NaN;
+    if(typeof v==='number')return v;
+    v=String(v).trim();
+    var m=v.match(/^(\d+)\s*\+\s*(\d+)$/);
+    if(m)return parseInt(m[1],10)+parseInt(m[2],10)/1000;
+    return parseFloat(v.replace(',','.'));
+  }
+  
+  function setData(arr){
+    lines={};
+    arr.forEach(function(p){(lines[p.l]=lines[p.l]||[]).push(p)});
+    Object.keys(lines).forEach(function(k){lines[k].sort(function(x,y){return x.pk-y.pk})});
+    buildGrid();
+    $('src').textContent='Base SNCF · '+arr.length.toLocaleString('fr-FR')+' points, '+Object.keys(lines).length+' lignes';
+  }
+  function renderPk(pk,est){
+    var p=fmtPk(pk).split(/[+,]/);
+    $('wp').classList.toggle('est',!!est);
+    $('wp').innerHTML=(est?'≈ ':'')+p[0]+'<small>+'+p[1]+'</small>';
+  }
+  /* ---------- voix ---------- */
+  function say(t){
+    if(!voiceOn||!window.speechSynthesis)return;
+    var u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';speechSynthesis.cancel();speechSynthesis.speak(u);
+  }
+  function announce(pk,est){
+    if(pk<0)return;
+    var hm=Math.floor(pk*10+1e-6);
+    if(hm===lastHm)return;
+    lastHm=hm;
+    var km=Math.floor(hm/10),m=(hm%10)*100;
+    say((est?'Environ ':'')+'PK '+km+(m?', '+m+' mètres':' pile'));
+    sendWatch((est?'PK~ ':'PK ')+km+'+'+String(m).padStart(3,'0')+(est?' est':''));
+  }
+  $('voice').onclick=function(){
+    voiceOn=!voiceOn;
+    $('voice').textContent=voiceOn?'🔊':'🔇';$('voice').setAttribute('aria-label',voiceOn?'Son activé':'Son désactivé');
+    if(voiceOn){lastHm=null}else{if(window.speechSynthesis)speechSynthesis.cancel();try{jin.pause()}catch(e){}}
+  };
+  /* ---------- carte ---------- */
+  function initMap(){
+    if(!window.L)return;
+    map=L.map('lmap',{preferCanvas:true}).setView([46.6,2.4],6);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+    lockInit();
+  }
+  function drawLine(){
+    if(!map||!lines[DEF])return;
+    var L0=lines[DEF],ll=[];for(var i=0;i<L0.length;i+=3)ll.push([L0[i].lat,L0[i].lon]);
+    var pl=L.polyline(ll,{color:'#667085',weight:3}).addTo(map);
+    if(first)map.fitBounds(pl.getBounds());
+  }
+  function navUrl(a){return 'https://www.google.com/maps/dir/?api=1&destination='+a.lat+','+a.lon+'&travelmode=driving&dir_action=navigate'}
+  function drawAcces(){
+    acces.forEach(function(a){
+      if(a.pk==null){var r=locate(a.lat,a.lon,DEF);a.pk=r?r.pk:null}
+      if(map)L.circleMarker([a.lat,a.lon],{radius:5,color:'#fff',weight:1,fillColor:'#1d6fe0',fillOpacity:1}).addTo(map)
+        .bindPopup('<b>'+a.n+'</b>'+(a.pk!=null?'<br>PK '+fmtPk(a.pk)+(a.l?' · ligne '+a.l:''):'')+'<br><a href="'+navUrl(a)+'" target="_blank">Y aller</a>');
+    });
+  }
+  function moveMap(lat,lon){
+    if(!map)return;
+    if(!me)me=L.circleMarker([lat,lon],{radius:9,color:'#fff',weight:3,fillColor:'#c8102e',fillOpacity:1}).addTo(map);
+    me.setLatLng([lat,lon]);
+    if(first){map.setView([lat,lon],14);first=false}else if(!holdMap&&!mapActive)map.panTo([lat,lon]);
+  }
+  /* ---------- position ---------- */
+  function onFix(lat,lon,spd){
+    last=[lat,lon];
+    if(loading)return;
+    var now=Date.now(),r=locate(lat,lon),st=$('wst');cur=r;if(r)r.pk+=PK_OFFSET;
+    if(lost)exitLost();
+    moveMap(lat,lon);
+    if(!r||r.d>=300){lastFix=null}
+    if(!r){$('wl').textContent='Ligne —';$('ws').textContent='aucune ligne à moins de 30 km';st.className='w-st none';st.textContent='hors ligne';return}
+    $('wl').textContent='Ligne '+r.l;
+    renderPk(r.pk,false);
+    var vv=voiesAt(r.l,r.pk-PK_OFFSET);$('ws').textContent='à '+Math.round(r.d)+' m de la voie'+(vv?' · voies '+vv:'');
+    if(r.d<150){st.className='w-st';st.textContent='sur la ligne'}
+    else if(r.d<1000){st.className='w-st off';st.textContent='proche de la ligne'}
+    else{st.className='w-st none';st.textContent='hors ligne (>1 km)'}
+    if(r.d<300){
+      var dir=lastFix?lastFix.dir:1;
+      if(lastFix&&lastFix.l===r.l&&Math.abs(r.pk-lastFix.pk)>0.003)dir=r.pk>lastFix.pk?1:-1;
+      var v=(spd!=null&&!isNaN(spd))?spd:(lastFix&&now>lastFix.t?Math.abs(r.pk-lastFix.pk)*1000/((now-lastFix.t)/1000):0);
+      if(lastFix)v=0.6*v+0.4*lastFix.v;
+      lastFix={t:now,pk:r.pk,l:r.l,dir:dir,v:v};
+      announce(r.pk,false);
+    }
+  }
+    function startGps(){
+    if(!navigator.geolocation){$('gpsmsg').textContent='GPS indisponible dans ce navigateur.';return}
+    if(watchId!==null)navigator.geolocation.clearWatch(watchId);
+    $('gpsmsg').textContent='Recherche de la position…';
+    watchId=navigator.geolocation.watchPosition(function(p){
+      $('gpsrow').style.display='none';
+      $('gpsmsg').textContent='GPS actif · précision ±'+Math.round(p.coords.accuracy)+' m'+(p.coords.accuracy>200?' (peu précis)':'');
+      lastAcc=p.coords.accuracy;onFix(p.coords.latitude,p.coords.longitude,p.coords.speed);
+    },function(e){
+      if(e.code===1){$('gpsrow').style.display='';$('gpsmsg').textContent='Localisation refusée : autorise-la dans les réglages du site, puis touche le bouton.'}
+      else if(!lastFix&&!lost)$('gpsmsg').textContent='GPS indisponible pour le moment ('+e.message+').';
+    },{enableHighAccuracy:true,maximumAge:2000,timeout:15000});
+  }
+  $('gps').onclick=startGps;
+  /* ---------- navigation vers un PK ---------- */
+  function posAtPk(line,pk){
+    var L0=lines[line];if(!L0||!L0.length||pk<L0[0].pk||pk>L0[L0.length-1].pk)return null;
+    var lo=0,hi=L0.length-1;while(lo<hi){var m=(lo+hi)>>1;if(L0[m].pk<pk)lo=m+1;else hi=m}
+    var b=L0[lo],a=L0[Math.max(0,lo-1)],t=b.pk>a.pk?(pk-a.pk)/(b.pk-a.pk):0;
+    return {lat:a.lat+(b.lat-a.lat)*t,lon:a.lon+(b.lon-a.lon)*t};
+  }
+  var holdMap=false,gMk=null,tMk=null,gTimer=null;
+  function findAccess(v){
+    if(isNaN(v))return {err:'Saisis un PK valide.'};
+    if(loading)return {err:'Base en cours de chargement…'};
+    var line=cur&&cur.d<2000?cur.l:DEF,pos=posAtPk(line,v-PK_OFFSET);
+    if(!pos){var L0=lines[line]||[];return {err:'PK hors de la ligne '+line+(L0.length?' (de '+L0[0].pk+' à '+L0[L0.length-1].pk+')':'')+'.'}}
+    if(!acces.length)return {err:'Aucun point d’accès chargé.'};
+    var k=Math.cos(pos.lat*Math.PI/180),best=null;
+    acces.forEach(function(a){var d=Math.hypot((a.lon-pos.lon)*111.32*k,(a.lat-pos.lat)*110.57);if(!best||d<best.d)best={d:d,a:a}});
+    return {a:best.a,d:best.d,pos:pos,line:line};
+  }
+  function clearTarget(){
+    holdMap=false;
+    if(map){if(gMk){map.removeLayer(gMk);gMk=null}if(tMk){map.removeLayer(tMk);tMk=null}}
+  }
+  function showTarget(){
+    clearTarget();$('gomsg').textContent='';
+    if(!map||!$('pkin').value.trim())return;
+    var v=parsePk($('pkin').value);if(isNaN(v))return;
+    var r=findAccess(v);
+    if(r.err){$('gomsg').textContent=r.err;return}
+    tMk=L.circleMarker([r.pos.lat,r.pos.lon],{radius:6,color:'#111',weight:2,fillColor:'#fff',fillOpacity:1}).addTo(map).bindTooltip('PK '+fmtPk(v),{direction:'bottom'});
+    gMk=L.marker([r.a.lat,r.a.lon],{icon:L.divIcon({className:'gblink',html:'<span></span>',iconSize:[20,20]}),zIndexOffset:1000}).addTo(map).bindTooltip(r.a.n+' · PK '+fmtPk(r.a.pk),{permanent:true,direction:'top',offset:[0,-8]});
+    holdMap=true;
+    map.fitBounds([[r.pos.lat,r.pos.lon],[r.a.lat,r.a.lon]],{maxZoom:15,padding:[40,40]});
+  }
+  $('pkin').addEventListener('input',function(){clearTimeout(gTimer);gTimer=setTimeout(showTarget,450)});
+  $('go').onclick=function(){
+    var r=findAccess(parsePk($('pkin').value));
+    if(r.err){$('gomsg').textContent=r.err;return}
+    window.open(navUrl(r.a),'_blank');
+  };
+  /* ---------- saisie PK ---------- */
+  function parsePk(t){
+    t=String(t).trim();
+    if(!t||/[^0-9 +.,]/.test(t))return NaN;
+    t=t.replace(',','.');
+    var m=t.match(/^(\d+)\s*\+\s*(\d{1,3})$/);
+    if(m)return +m[1]+(+m[2])/1000;
+    if(/^\d+\.\d+$/.test(t))return parseFloat(t);
+    var d=t.replace(/\s/g,'');
+    if(/^\d+$/.test(d))return d.length>3?parseInt(d,10)/1000:parseInt(d,10);
+    return NaN;
+  }
+  $('pkin').oninput=function(){this.value=this.value.replace(/[^0-9 +.,]/g,'')};
+  /* ---------- montre ---------- */
+  var wNotif=false,wChar=null,wDev=null;
+  function wset(t){$('wmsg').textContent=t}
+  function wIcon(){$('wbtn').textContent=(wNotif||wChar)?'⌚🕶️✓':'⌚🕶️'}
+  function sendWatch(text,urgent){
+    var t=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(wChar){
+      var b=new Uint8Array([0,1].concat(Array.from(new TextEncoder().encode(t.slice(0,18)))));
+      wChar.writeValue(b).catch(function(e){wset('Envoi Bluetooth impossible : '+e.message)});
+    }
+    if(wNotif&&navigator.serviceWorker){
+      var o=urgent?{tag:'pk-alert',renotify:true,silent:false,vibrate:[250,120,250]}:{tag:'pk',renotify:false,silent:true};
+      o.icon='icon-192.png';o.body=cur?('Ligne '+cur.l):'';
+      navigator.serviceWorker.ready.then(function(reg){reg.showNotification(t,o)}).catch(function(){});
+    }
+  }
+  $('wbtn').onclick=function(){var m=$('wmenu');m.style.display=m.style.display==='none'?'':'none'};
+  $('wn').onclick=async function(){
+    if(!('Notification' in window)){wset('Notifications indisponibles sur cet appareil.');return}
+    var p=await Notification.requestPermission();
+    if(p!=='granted'){wset('Notifications refusées : autorise-les dans les réglages du site.');return}
+    wNotif=true;wIcon();$('wmenu').style.display='none';
+    wset('Notifications activées : les montres et lunettes liées au téléphone les reçoivent, selon leur application.');
+    sendWatch('PK '+(cur?fmtPk(cur.pk):'0+000'));
+  };
+  $('wb').onclick=async function(){
+    if(!navigator.bluetooth){wset('Bluetooth direct indisponible dans ce navigateur.');return}
+    try{
+      wDev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[0x1811]});
+      wset('Connexion à '+(wDev.name||'l’appareil')+'…');
+      var srv=await wDev.gatt.connect();
+      wDev.addEventListener('gattserverdisconnected',function(){wChar=null;wIcon();wset('Appareil Bluetooth déconnecté.')});
+      var svc=await srv.getPrimaryService(0x1811);
+      wChar=await svc.getCharacteristic(0x2a46);
+      wIcon();$('wmenu').style.display='none';wset('Connecté : '+(wDev.name||'')+'. Un PK est envoyé tous les 100 m.');
+      sendWatch('PK connecte');
+    }catch(e){
+      wset('Bluetooth : '+(e.name==='NotFoundError'?'aucun appareil choisi, ou cet appareil n’accepte pas les alertes texte.':e.message));
+    }
+  };
+  $('woff').onclick=function(){
+    wNotif=false;wChar=null;if(wDev&&wDev.gatt&&wDev.gatt.connected)wDev.gatt.disconnect();
+    wIcon();$('wmenu').style.display='none';wset('Envoi vers montre et lunettes désactivé.');
+  };
+  /* ---------- perte GPS + estimation ---------- */
+  var lastFix=null,lost=false,lostT=0,estKm=0,tickT=Date.now(),lastMoveT=Date.now(),accelOk=false,samples=[];
+  function enterLost(){
+    lost=true;lostT=Date.now();estKm=0;tickT=lostT;
+    $('gpsmsg').textContent='⚠ Signal GPS perdu : PK estimé avec l’accéléromètre, valeur approximative.';
+    var st=$('wst');st.className='w-st off';st.textContent='GPS perdu · estimé';
+    say('Signal GPS perdu. PK estimé.');sendWatch('GPS PERDU',true);
+  }
+  function exitLost(){lost=false;$('gpsmsg').textContent='GPS retrouvé.';say('GPS retrouvé')}
+  setInterval(function(){
+    if(!lastFix||loading)return;
+    var now=Date.now();
+    if(!lost){if(now-lastFix.t>10000)enterLost();else return}
+    var dt=Math.min((now-tickT)/1000,5);tickT=now;
+    var moving=!accelOk||now-lastMoveT<4000;
+    estKm+=(moving?lastFix.v:0)*dt/1000;
+    var L0=lines[lastFix.l],pk=lastFix.pk+lastFix.dir*estKm;
+    if(L0&&L0.length)pk=Math.max(L0[0].pk+PK_OFFSET,Math.min(L0[L0.length-1].pk+PK_OFFSET,pk));
+    renderPk(pk,true);estNow=pk;
+    $('ws').textContent='estimé · '+Math.round((now-lostT)/1000)+' s sans GPS'+(moving?'':' · à l’arrêt');
+    announce(pk,true);
+  },1000);
+  if(window.DeviceMotionEvent)window.addEventListener('devicemotion',function(e){
+    var a=e.accelerationIncludingGravity;if(!a||a.x==null)return;
+    accelOk=true;var t=Date.now();
+    samples.push([t,Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)]);
+    while(samples.length&&t-samples[0][0]>2000)samples.shift();
+    if(samples.length>10){var m=0,q=0;samples.forEach(function(x){m+=x[1]});m/=samples.length;samples.forEach(function(x){q+=(x[1]-m)*(x[1]-m)});if(Math.sqrt(q/samples.length)>0.06)lastMoveT=t}
+  });
+  /* ---------- surveillance de zone (INDICATIF, voyageurs seulement) ---------- */
+  var SIRI='https://proxy.transport.data.gouv.fr/resource/sncf-siri-lite-estimated-timetable';
+  var ALERT_MIN=20,ZONE_KM=0.5,VOIE={inc:null,dec:null}; /* VOIE ex. {inc:'1',dec:'2'} */
+  var voies=null,feedAttempt=0,mapActive=false,feedN=0,gares=null,zoneOn=false,zonePk=null,journeys=[],feedT=0,feedErr='',zTimer=null,fTimer=null,zKey='';
+  function loadGares(){return gares?Promise.resolve(gares):fetch('gares.json').then(function(r){return r.json()}).then(function(a){gares={};a.forEach(function(g){gares[g.u]=g});return gares})}
+  function tms(x){var t=Date.parse(x);return isNaN(t)?null:t}
+  function walk(o,out){
+    if(!o||typeof o!=='object')return;
+    if(Array.isArray(o)){o.forEach(function(x){walk(x,out)});return}
+    if(o.EstimatedCalls){out.push(o);return}
+    for(var k in o)walk(o[k],out);
+  }
+  function xmlJ(t){
+    var d=new DOMParser().parseFromString(t,'application/xml');
+    if(d.getElementsByTagName('parsererror').length)throw new Error('XML illisible');
+    function g(el,n){var e=el.getElementsByTagNameNS('*',n)[0];return e?e.textContent.trim():''}
+    var out=[];
+    Array.prototype.forEach.call(d.getElementsByTagNameNS('*','EstimatedVehicleJourney'),function(j){
+      var cs=[];
+      Array.prototype.forEach.call(j.getElementsByTagNameNS('*','EstimatedCall'),function(c){
+        cs.push({StopPointRef:g(c,'StopPointRef'),ExpectedArrivalTime:g(c,'ExpectedArrivalTime'),AimedArrivalTime:g(c,'AimedArrivalTime'),ExpectedDepartureTime:g(c,'ExpectedDepartureTime'),AimedDepartureTime:g(c,'AimedDepartureTime')});
+      });
+      out.push({EstimatedCalls:cs,DatedVehicleJourneyRef:g(j,'DatedVehicleJourneyRef')||g(j,'VehicleJourneyRef')||g(j,'LineRef')});
+    });
+    return out;
+  }
+  function parseJ(j){
+    var cs=j.EstimatedCalls;if(cs&&cs.EstimatedCall)cs=cs.EstimatedCall;if(!Array.isArray(cs))cs=cs?[cs]:[];
+    var st=[];
+    cs.forEach(function(c){
+      var r=c.StopPointRef,u=(typeof r==='object'?JSON.stringify(r):String(r)).match(/87\d{6}/),g=u&&gares[u[0]];
+      if(!g)return;
+      st.push({u:g.u,n:g.n,a:tms(c.ExpectedArrivalTime||c.AimedArrivalTime),d:tms(c.ExpectedDepartureTime||c.AimedDepartureTime)});
+    });
+    var id=j.DatedVehicleJourneyRef||j.VehicleJourneyRef||j.TrainNumbers||j.LineRef||'?';
+    return {id:typeof id==='object'?JSON.stringify(id):String(id),st:st};
+  }
+  function lineStops(j,L){
+    var o=[];
+    j.st.forEach(function(s){var g=gares[s.u],pk=g&&g.l[L];if(pk!=null)o.push({pk:pk,n:s.n,a:s.a,d:s.d})});
+    return o;
+  }
+  function countOn(L){return journeys.filter(function(j){return lineStops(j,L).length>1}).length}
+  function evalZone(z,L){
+    var now=Date.now(),c=[];
+    journeys.forEach(function(j){
+      var S=lineStops(j,L);
+      for(var i=0;i+1<S.length;i++){
+        var a=S[i],b=S[i+1];if(a.pk===b.pk)continue;
+        if(z<Math.min(a.pk,b.pk)||z>Math.max(a.pk,b.pk))continue;
+        var t0=a.d||a.a,t1=b.a||b.d;if(!t0||!t1)continue;
+        c.push({t:t0+(z-a.pk)/(b.pk-a.pk)*(t1-t0),dir:b.pk>a.pk?1:-1,id:j.id});
+      }
+    });
+    c.sort(function(x,y){return x.t-y.t});
+    return c.filter(function(x){return x.t>now-3*60000&&x.t<now+60*60000});
+  }
+  function ends(L){
+    var a=Object.keys(gares).map(function(k){return gares[k]}).filter(function(g){return g.l[L]!=null}).sort(function(x,y){return x.l[L]-y.l[L]});
+    return a.length?[a[0].n,a[a.length-1].n]:['',''];
+  }
+  function sensTxt(d,L){
+    var e=ends(L);
+    return (d>0?'sens PK croissant'+(e[1]?' (vers '+e[1]+')':''):'sens PK décroissant'+(e[0]?' (vers '+e[0]+')':''))+(VOIE[d>0?'inc':'dec']?', voie '+VOIE[d>0?'inc':'dec']:'');
+  }
+  function hhmm(t){return new Date(t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+  function flank(z,L){
+    var arr=Object.keys(gares).map(function(k){var g=gares[k];return g.l[L]!=null?{n:g.n,pk:g.l[L]}:null}).filter(Boolean).sort(function(x,y){return x.pk-y.pk}),p=null,n=null;
+    arr.forEach(function(g){if(g.pk<=z)p=g});
+    for(var i=0;i<arr.length;i++){if(arr[i].pk>=z){n=arr[i];break}}
+    return [p,n];
+  }
+  function departures(g,L){
+    var now=Date.now(),out=[];
+    journeys.forEach(function(j){
+      var S=lineStops(j,L);
+      S.forEach(function(s,i){
+        var nx=S[i+1];
+        if(s.n!==g.n||!s.d||!nx)return;
+        if(s.d<now-2*60000||s.d>now+60*60000)return;
+        out.push({t:s.d,dir:nx.pk>s.pk?1:-1});
+      });
+    });
+    out.sort(function(x,y){return x.t-y.t});
+    return out;
+  }
+  function activeZone(){
+    if(zoneOn)return {z:zonePk,L:cur&&cur.d<2000?cur.l:DEF};
+    if(lost&&estNow!=null&&lastFix)return {z:estNow,L:lastFix.l};
+    if(cur)return {z:cur.pk,L:cur.l,d:cur.d};
+    return null;
+  }
+  /* sirène douce + voix + vibration */
+  var actx=null;
+  function unlockAudio(){try{var AC=window.AudioContext||window.webkitAudioContext;if(!actx&&AC)actx=new AC();if(actx&&actx.state==='suspended')actx.resume()}catch(e){}}
+  ['touchstart','click'].forEach(function(ev){document.addEventListener(ev,unlockAudio,{passive:true})});
+  var jin=new Audio('jingle.wav');jin.preload='auto';
+  function siren(){try{jin.currentTime=0;var p=jin.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
+  function alertSound(mn,dir,L){
+    if(voiceOn)siren();
+    if(navigator.vibrate)navigator.vibrate([250,120,250]);
+    if(voiceOn&&window.speechSynthesis){setTimeout(function(){speechSynthesis.cancel();var u=new SpeechSynthesisUtterance('Attention, train potentiel dans la zone dans '+mn+' minutes, '+sensTxt(dir,L));u.lang='fr-FR';speechSynthesis.speak(u)},2400)}
+    sendWatch('TRAIN ~'+mn+' min',true);
+  }
+  var tOpen=true,tTimer=null,zState='';
+  function applyOpen(){$('talert').classList.toggle('open',tOpen);$('tdep').classList.toggle('open',tOpen)}
+  function openT(ms){tOpen=true;applyOpen();clearTimeout(tTimer);tTimer=setTimeout(function(){tOpen=false;applyOpen()},ms)}
+  $('tah').onclick=$('tdh').onclick=function(){if(tOpen){tOpen=false;clearTimeout(tTimer);applyOpen()}else openT(10000)};
+  function renderZone(){
+    var box=$('talert'),dep=$('tdep'),w=$('watch'),az=activeZone(),z=az&&az.z,L=az&&az.L,st,dist=(az&&az.d>=300)?(az.d>=1000?', à '+(az.d/1000).toFixed(1).replace('.',',')+' km de la voie':', à '+Math.round(az.d)+' m de la voie'):'';
+    function cls(el,b){el.className=b+(tOpen?' open':'')}
+    function head(t,blink){$('tah').textContent=t;$('tah').className='th'+(blink?' blk':'')}
+    if(z==null){box.style.display='none';dep.style.display='none';w.classList.remove('alert');zState='';return}
+    box.style.display='';
+    var now=Date.now(),zl='Zone PK '+fmtPk(z)+' ±'+ZONE_KM*1000+' m, ligne '+L+dist+' ('+(zoneOn?'PK saisi':'ta position')+')';
+    if(!feedT&&!feedErr){
+      cls(box,'talert');head('Zone PK '+fmtPk(z)+' · chargement…');$('tab').textContent=zl+' : chargement des horaires…';
+      dep.style.display='none';w.classList.remove('alert');st='load';
+    }else if(feedErr||now-feedT>6*60000){
+      cls(box,'talert warn');head('Surveillance indisponible');w.classList.remove('alert');dep.style.display='none';
+      $('tab').textContent=zl+' : surveillance indisponible ('+(feedErr||'données trop anciennes')+'). Aucune détection : ne pas en déduire que la zone est libre.';st='warn';
+    }else{
+      var c=evalZone(z,L),near=c.filter(function(x){return x.t<=now+ALERT_MIN*60000});
+      if(near.length){
+        cls(box,'talert on');w.classList.add('alert');
+        var mn=Math.max(0,Math.round((near[0].t-now)/60000));
+        head('⚠ TRAIN POTENTIEL ≈ '+mn+' min',true);
+        $('tab').innerHTML='<div>'+zl+' : '+near.map(function(x){return '≈ '+Math.max(0,Math.round((x.t-now)/60000))+' min (vers '+hhmm(x.t)+'), '+sensTxt(x.dir,L)}).join(' · ')+'.</div><div class="blk">Les trains annoncés ne sont pas tous visibles : fret, maintenance et circulations spéciales absents. Ne remplace pas la protection.</div>';
+        var key=near.map(function(x){return x.id}).join('|');st='alert:'+key;
+        if(key!==zKey){zKey=key;alertSound(mn,near[0].dir,L)}
+      }else{
+        zKey='';cls(box,'talert');w.classList.remove('alert');
+        head('Zone PK '+fmtPk(z)+' · '+(c.length?'prochain train ≈ '+Math.round((c[0].t-now)/60000)+' min':'aucun train annoncé'));
+        $('tab').textContent=zl+' : '+(c.length?'prochain train de voyageurs estimé vers '+hhmm(c[0].t)+' (≈ '+Math.round((c[0].t-now)/60000)+' min), '+sensTxt(c[0].dir,L)+'. ':'aucun train de voyageurs prévu dans l’heure. ')+'Les trains annoncés ne sont pas tous visibles : fret, maintenance et circulations spéciales absents. Ne pas en déduire que la zone est libre. ['+feedN+' trajets lus, '+countOn(L)+' passant par la ligne]';
+        st='info';
+      }
+      var h='';
+      var e=ends(L);flank(z,L).forEach(function(g,i,a){
+        if(!g||(i===1&&a[0]&&a[0].n===g.n))return;
+        var d=departures(g,L).slice(0,4);
+        h+='<div><b>'+esc(g.n)+' (PK '+fmtPk(g.pk)+')</b> : '+(d.length?d.map(function(x){return hhmm(x.t)+' '+'→ '+(x.dir>0?e[1]:e[0])}).join(' · '):'aucun départ voyageurs annoncé dans l’heure')+'</div>';
+      });
+      $('tdh').textContent='Départs des gares encadrantes';$('tdb').innerHTML=h;cls(dep,'tdep');dep.style.display='';
+    }
+    if(st!==zState){zState=st;openT(3000)}
+  }
+  function pull(){feedAttempt=Date.now();
+    fetch(SIRI,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}).then(function(t){
+      var out=[],tt=t.replace(/^\uFEFF/,'').trim();
+      if(tt.charAt(0)==='<'){out=xmlJ(tt)}else{var j;try{j=JSON.parse(tt)}catch(e){throw new Error('format inattendu, début du flux : '+tt.slice(0,60))}walk(j,out)}
+      
+      if(!out.length)throw new Error('aucun trajet reconnu dans le flux (début : '+tt.slice(0,80)+')');
+      var all=out.map(parseJ);feedN=all.length;journeys=all.filter(function(x){return x.st.length>1});feedT=Date.now();feedErr='';renderZone();
+    }).catch(function(e){feedErr=e.name==='TypeError'?'flux inaccessible depuis l’appli (réseau ou blocage du navigateur)':e.message;renderZone()});
+  }
+  /* ---------- carte verrouillée : 2 touches pour la manipuler ---------- */
+  var lastTap=0,mapIdle=null;
+  function lockMap(){
+    if(!map)return;mapActive=false;
+    map.dragging.disable();map.touchZoom.disable();map.scrollWheelZoom.disable();
+    $('lmap').classList.add('locked');$('lmap').classList.remove('active');$('mhint').style.display='';
+  }
+  function unlockMap(){
+    if(!map)return;mapActive=true;
+    map.dragging.enable();map.touchZoom.enable();map.scrollWheelZoom.enable();
+    $('lmap').classList.remove('locked');$('lmap').classList.add('active');$('mhint').style.display='none';
+    clearTimeout(mapIdle);mapIdle=setTimeout(lockMap,20000);
+  }
+  function lockInit(){
+    map.doubleClickZoom.disable();map.boxZoom.disable();map.keyboard.disable();
+    lockMap();
+    $('lmap').addEventListener('click',function(){
+      var t=Date.now();
+      if(!mapActive&&t-lastTap<450)unlockMap();
+      lastTap=t;
+    });
+    map.on('moveend zoomend',function(){if(mapActive){clearTimeout(mapIdle);mapIdle=setTimeout(lockMap,20000)}});
+    document.addEventListener('touchstart',function(e){if(mapActive&&!$('lmap').contains(e.target))lockMap()},{passive:true});
+  }
+  /* ---------- voies (voies.json optionnel) ---------- */
+  function voiesAt(L,pk){
+    var a=voies&&voies[L];if(!a)return '';
+    var o=[];a.forEach(function(x){if(pk>=x[0]&&pk<=x[1]&&o.indexOf(x[2])<0)o.push(x[2])});
+    return o.sort().join(', ');
+  }
+  fetch('voies.json').then(function(r){return r.ok?r.json():null}).then(function(j){voies=j}).catch(function(){});
+  /* ---------- météo de la gare la plus proche ---------- */
+  var wxKey='',wxT=0;
+  function updateWx(){
+    if(!last||!gares)return;
+    var lat=last[0],lon=last[1],k=Math.cos(lat*Math.PI/180),best=null;
+    Object.keys(gares).forEach(function(u){var g=gares[u];if(g.lat==null)return;var d=Math.hypot((g.lon-lon)*111.32*k,(g.lat-lat)*110.57);if(!best||d<best.d)best={d:d,g:g}});
+    var st=best&&best.d<=30,key=st?best.g.u:'pos',now=Date.now();
+    if(key===wxKey&&now-wxT<600000)return;
+    wxKey=key;wxT=now;
+    var la=st?best.g.lat:lat,lo=st?best.g.lon:lon;
+    $('mgare').textContent=st?best.g.n:'Ma position';
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+la.toFixed(4)+'&longitude='+lo.toFixed(4)+'&current=temperature_2m&timezone=auto')
+      .then(function(r){if(!r.ok)throw new Error('HTTP');return r.json()})
+      .then(function(j){var t=j.current&&j.current.temperature_2m;$('mair').textContent='Air '+(t==null?'—':t.toFixed(1).replace('.',',')+' °C')})
+      .catch(function(){$('mair').textContent='Air —';wxT=now-540000});
+  }
+  /* ---------- donner sa position (SMS) ---------- */
+  var estNow=null,lastAcc=null,posTxt='';
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function buildPos(){
+    if(!last)return null;
+    var lat=last[0],lon=last[1],now=new Date(),T=[],H=[];
+    function add(t,h){T.push(t);H.push('<div class="l">'+(h||esc(t))+'</div>')}
+    var pk=lost&&estNow!=null?estNow:(cur?cur.pk:null);
+    var pt=cur&&cur.d<300&&pk!=null?('Ligne '+cur.l+', PK '+fmtPk(pk)+(lost?' (estimé)':'')):'hors ligne';
+    add('Ma position à '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+' : '+pt);
+    add('GPS : '+lat.toFixed(5)+', '+lon.toFixed(5)+(lastAcc!=null?' (±'+Math.round(lastAcc)+' m)':'')+(lost?' - signal GPS perdu, dernière position connue':''));
+    var best=null,k=Math.cos(lat*Math.PI/180);
+    acces.forEach(function(a){var d=Math.hypot((a.lon-lon)*111.32*k,(a.lat-lat)*110.57)*1000;if(!best||d<best.d)best={d:d,a:a}});
+    if(best){
+      var ds=best.d<1000?Math.round(best.d)+' m':(best.d/1000).toFixed(1).replace('.',',')+' km',nu=navUrl(best.a);
+      add('Accès le plus proche : '+best.a.n+', PK '+fmtPk(best.a.pk)+', à '+ds+' à vol d’oiseau');
+      var pu='https://www.google.com/maps?q='+lat.toFixed(6)+','+lon.toFixed(6);
+      T.push('Ma position : '+pu);H.push('<div class="l">Ma position : <a class="gl" href="'+pu+'" target="_blank" rel="noopener">'+esc(pu)+'</a></div>');
+      T.push('Itinéraire vers l’accès : '+nu);H.push('<div class="l">Itinéraire vers l’accès : <a class="gl" href="'+nu+'" target="_blank" rel="noopener">'+esc(nu)+'</a></div>');
+    }else{
+      var pu2='https://www.google.com/maps?q='+lat.toFixed(6)+','+lon.toFixed(6);
+      T.push('Ma position : '+pu2);H.push('<div class="l">Ma position : <a class="gl" href="'+pu2+'" target="_blank" rel="noopener">'+esc(pu2)+'</a></div>');
+    }
+    return {text:T.join('\n'),html:H.join('')};
+  }
+  $('posbtn').onclick=function(){
+    var m=buildPos();$('posbox').style.display='';
+    if(!m){$('smstxt').textContent='Position GPS indisponible pour le moment.';posTxt='';return}
+    $('smstxt').innerHTML=m.html;posTxt=m.text;
+  };
+  $('smssend').onclick=function(){if(posTxt)location.href='sms:?&body='+encodeURIComponent(posTxt)};
+  $('smscopy').onclick=function(){
+    var b=$('smscopy');if(!posTxt)return;
+    (navigator.clipboard?navigator.clipboard.writeText(posTxt):Promise.reject()).then(function(){b.textContent='Copié ✓'},function(){b.textContent='Copie impossible'});
+    setTimeout(function(){b.textContent='Copier'},2000);
+  };
+  /* ---------- photo avec PK ---------- */
+  var photoFile=null,photoUrl=null;
+  function stampLines(){
+    var d=new Date(),L=[],pk=lost&&estNow!=null?estNow:(cur?cur.pk:null);
+    L.push(cur&&cur.d<300&&pk!=null?('Ligne '+cur.l+' · PK '+fmtPk(pk)+(lost?' (estimé)':'')):'Hors ligne');
+    if(last)L.push('GPS '+last[0].toFixed(5)+', '+last[1].toFixed(5)+(lastAcc!=null?' (±'+Math.round(lastAcc)+' m)':''));
+    L.push(d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
+    return L;
+  }
+  $('photobtn').onclick=function(){$('photoin').value='';$('photoin').click()};
+  $('photoin').onchange=function(){
+    var f=this.files&&this.files[0];if(!f)return;
+    var L=stampLines(),url=URL.createObjectURL(f),img=new Image();
+    img.onload=function(){
+      var sc=Math.min(1,1600/Math.max(img.width,img.height)),w=Math.round(img.width*sc),h=Math.round(img.height*sc),c=document.createElement('canvas');
+      c.width=w;c.height=h;var x=c.getContext('2d');x.drawImage(img,0,0,w,h);
+      var fs=Math.max(14,Math.round(w/30)),pad=Math.round(fs*0.6),bh=Math.round(pad*2+fs*1.25*L.length);
+      x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,h-bh,w,bh);
+      x.fillStyle='#fff';x.font='bold '+fs+'px sans-serif';x.textBaseline='top';
+      L.forEach(function(t,i){x.fillText(t,pad,h-bh+pad+i*fs*1.25)});
+      URL.revokeObjectURL(url);
+      c.toBlob(function(b){
+        $('photobox').style.display='';
+        if(!b){$('phmsg').textContent='Photo impossible à traiter.';return}
+        var d=new Date(),nm='photo_PK_'+(cur?fmtPk(cur.pk).replace('+','p'):'x')+'_'+d.toISOString().slice(0,16).replace(/[-:T]/g,'')+'.jpg';
+        photoFile=new File([b],nm,{type:'image/jpeg'});
+        if(photoUrl)URL.revokeObjectURL(photoUrl);
+        photoUrl=URL.createObjectURL(b);$('photoimg').src=photoUrl;$('phmsg').textContent='';
+      },'image/jpeg',0.85);
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);$('photobox').style.display='';$('phmsg').textContent='Photo illisible.'};
+    img.src=url;
+  };
+  $('phshare').onclick=function(){
+    if(!photoFile)return;
+    var txt=stampLines().join('\n')+(last?'\nhttps://www.google.com/maps?q='+last[0].toFixed(6)+','+last[1].toFixed(6):'');
+    if(navigator.canShare&&navigator.canShare({files:[photoFile]})){
+      navigator.share({files:[photoFile],title:'Photo PK',text:txt}).catch(function(e){if(e&&e.name!=='AbortError')$('phmsg').textContent='Partage impossible : '+e.message});
+    }else $('phmsg').textContent='Partage de photo non pris en charge ici : touche « Enregistrer », puis joins la photo à ton mail, SMS ou WhatsApp.';
+  };
+  $('phsave').onclick=function(){
+    if(!photoUrl)return;
+    var a=document.createElement('a');a.href=photoUrl;a.download=photoFile.name;document.body.appendChild(a);a.click();a.remove();
+  };
+  $('phclose').onclick=function(){
+    $('photobox').style.display='none';if(photoUrl){URL.revokeObjectURL(photoUrl);photoUrl=null}
+    $('photoimg').removeAttribute('src');photoFile=null;
+  };
+  /* ---------- SOS : un seul bouton qui déroule les numéros ---------- */
+  $('sosbtn').onclick=function(){
+    var o=$('urg').style.display==='none';
+    $('urg').style.display=o?'':'none';$('urgn').style.display=o?'':'none';
+    $('sosbtn').textContent=o?'✖ Fermer SOS':'🆘 Appeler SOS';
+    if(!o)disarm();
+  };
+  /* ---------- urgences : double appui ---------- */
+  var EMERG=[['112','Urgences'],['15','SAMU'],['17','Police'],['18','Pompiers'],['3117','Sûreté SNCF'],['31177','SMS Sûreté','sms:']],armed=null,armT=null;
+  function disarm(){if(armed){armed.classList.remove('arm');armed.lastChild.textContent=armed.dataset.l;armed=null}clearTimeout(armT)}
+  EMERG.forEach(function(e){
+    var b=document.createElement('button');b.dataset.l=e[1];b.dataset.n=e[0];
+    b.innerHTML='<b>'+e[0]+'</b><span>'+e[1]+'</span>';
+    b.onclick=function(){
+      if(armed===b){disarm();location.href=(e[2]||'tel:')+e[0];return}
+      disarm();armed=b;b.classList.add('arm');b.lastChild.textContent=e[2]?'Touche encore pour écrire':'Touche encore pour appeler';
+      armT=setTimeout(disarm,4000);
+    };
+    $('urg').appendChild(b);
+  });
+  /* ---------- démarrage ---------- */
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
+  initMap();
+  startGps();
+  fetch('pks.json').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
+    var arr=[];
+    j.l.forEach(function(L){var pk=0,la=0,lo=0;for(var i=0;i<L.p.length;i++){pk+=L.p[i];la+=L.a[i];lo+=L.o[i];arr.push({l:L.c,pk:pk/1000,lat:la/1e5,lon:lo/1e5})}});
+    setData(arr);
+    return fetch('acces.json').then(function(r){return r.ok?r.json():[]}).catch(function(){return[]});
+  }).then(function(a){
+    acces=a||[];loading=false;
+    drawLine();drawAcces();
+    if(last)onFix(last[0],last[1]);
+    setInterval(function(){renderZone();loadGares().then(updateWx).catch(function(){});
+      if(activeZone()!=null&&Date.now()-feedAttempt>115000)loadGares().then(function(){pull()}).catch(function(){feedErr='liste des gares indisponible';renderZone()});
+    },5000);
+  }).catch(function(){$('src').textContent='Base SNCF indisponible (réseau ?)'});
+  var RQS=["Je ne réalise que les missions pour lesquelles je suis habilité(e) ou autorisé(e).", "J’utilise toujours, et correctement, les EPI et agrès adaptés à ma mission.", "Je ne travaille jamais après avoir consommé alcool, stupéfiants ou produit altérant ma concentration.", "Je prends toujours en compte le risque ferroviaire et je respecte les distances de sécurité.", "Conduire ou téléphoner : je choisis.", "Avant toute manœuvre, je fais un briefing et je m’assure d’être compris.", "Aucun appareil qui peut me distraire dans mes déplacements ou en intervention dans les voies.", "Toute installation électrique est sous tension : j’ai la ou les clés de chauffage sur moi avant de toucher le câblot.", "Avant d’entrer dans l’attelage : arrêt des véhicules, contact des tampons, autorisation obtenue.", "Toujours 3 points d’appui pour monter et descendre d’un véhicule."],IC=['🪪','🦺','🚫🍺','🚆','📵','🗣️','🎧','⚡','🔗','🪜'],ri=0,rt=$('rqt');
+  function showR(){
+    rt.textContent=IC[ri]+'  '+RQS[ri];
+    rt.style.animation='none';void rt.offsetWidth;
+    var c=$('rqm').offsetWidth,w=rt.offsetWidth;
+    rt.style.setProperty('--cw',c+'px');
+    rt.style.animation='rqs '+((w+c)/60)+'s linear forwards';
+  }
+  function nextR(){ri=(ri+1)%RQS.length;showR()}
+  rt.addEventListener('animationend',nextR);
+  $('rqs').onclick=function(e){if(e.target.tagName!=='A')nextR()};
+  showR();
+})();
+</script>
+</body>
+</html>

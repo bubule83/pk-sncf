@@ -1,6 +1,6 @@
 {
-  "name": "PK SNCF",
-  "short_name": "PK SNCF",
+  "name": "Compagnon",
+  "short_name": "Compagnon",
   "description": "Affiche la ligne et le point kilométrique SNCF le plus proche",
   "start_url": "./index.html",
   "scope": "./",
@@ -10,7 +10,17 @@
   "theme_color": "#c8102e",
   "lang": "fr",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
